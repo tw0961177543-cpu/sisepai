@@ -74,7 +74,8 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 }
 @media (max-width:699px) and (orientation:portrait){
   .brand{font-size:21px} .meta{font-size:14px} .tbtn{padding:6px 9px; font-size:15px}
-  .card.rv{--w:18px} .card.md{--w:40px}
+  .card.rv{--w:16px} .card.md{--w:38px}
+  .who{font-size:14px; white-space:normal; max-width:5.5em}
   .av.seat-av{width:42px; height:42px; font-size:21px}
   .felt{min-height:0; padding:10px 12px}
   #app{gap:6px}
@@ -276,7 +277,11 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .seat{padding:2px; gap:1px} .table .s-top{padding:0 6px}
   .av.seat-av{width:34px; height:34px; font-size:17px}
   .oname{font-size:15px} .osub{font-size:12px}
-  .card.md{--w:32px} .card.rv{--w:15px}
+  .card.md{--w:28px} .card.rv{--w:14px}
+  .top{position:fixed; top:0; right:0; width:150px; z-index:6; flex-wrap:wrap; justify-content:center; padding:6px 6px 0; gap:4px}
+  .top .brand,.top .meta{display:none}
+  .tbtn{flex:1 1 40%}
+  .bar .bar-in{padding-top:84px}
   .who{font-size:14px}
   .back{width:20px; height:54px}
   :root{--hand-w:27px} :root.big{--hand-w:31px}
@@ -954,8 +959,8 @@ function render(){
   // seats around the table: 下家 right, 對家 top, 上家 left (3 players: 下家 right, 上家 left)
   const pos=N===4?{1:'R',2:'T',3:'L'}:{1:'R',2:'L'};
   const pend=G.last&&!G.over?G.last:null; // the card everybody is looking at right now
-  const river=i=>{
-    const all=G.players[i].discards,cut=Math.max(0,all.length-12),d=all.slice(cut);
+  const river=(i,cap)=>{
+    const all=G.players[i].discards,d=all.slice(Math.max(0,all.length-cap));
     return d.map((t,k)=>cardHTML(t,'rv'+(pend&&pend.p===i&&k===d.length-1?' just':''))).join('');
   };
   for(const s of ['T','L','R']){const el=$('#seat'+s);el.innerHTML='';el.className='seat s-'+({T:'top',L:'left',R:'right'})[s]+' empty';}
@@ -969,10 +974,10 @@ function render(){
         <div class="osub">${pl.hand.length} 張 · <span class="coin c10" aria-hidden="true">10</span>${fmt(c||0)}</div></div>
       ${melds?`<div class="mini">${melds}</div>`:''}`;
   }
-  $('#rivB').innerHTML=river(0);
-  $('#rivT').innerHTML=N===4?river(2):'';
-  $('#rivL').innerHTML=river(N===4?3:2);
-  $('#rivR').innerHTML=river(1);
+  $('#rivB').innerHTML=river(0,12);
+  $('#rivT').innerHTML=N===4?river(2,12):'';
+  $('#rivL').innerHTML=river(N===4?3:2,8);
+  $('#rivR').innerHTML=river(1,8);
   const pile=`<div class="pile"><div class="back" aria-hidden="true"></div><div><b>${G.pile.length}</b></div></div>`;
   const who=i=>i===0?'你':esc(nameOf(i));
   let big='';
