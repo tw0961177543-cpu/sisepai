@@ -1,0 +1,1590 @@
+<!doctype html><html lang="zh-Hant-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>
+<title>奶奶的四色牌</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+/* Layout: one phone-held card table. Opponents across the top, the latest discard in the middle, grandma's hand in one row per color, and a sticky bar of big picture buttons (the buttons show real cards, because the player reads only card characters). Money is drawn as NT$10 / NT$50 coins and NT$100 bills. */
+:root{
+  --bg:#dfe8e1; --felt:#c7d8cb; --panel:#f6f9f5; --ink:#1b2722; --muted:#4f6157; --line:#a9bcaf;
+  --accent:#b46a14; --accent-ink:#ffffff; --hu:#bf3328; --hu-ink:#ffffff; --sel:#e58a00; --on:#2a7a56;
+  --chi:#2f6fb0; --chi-ink:#ffffff; --pass:#d9e1db; --pass-ink:#2a3530; --go:#2a7a56; --go-ink:#ffffff;
+  --win:#1f7a4a; --lose:#b0352b;
+  --scrim:rgba(10,20,15,.5); --shadow:rgba(20,30,25,.18);
+  --card-bg:#fbf6e9; --card-edge:#c9bfa6; --back:#7a2e22; --back-line:#b9574a;
+  --y-band:#f0c232; --y-band-ink:#4f3900; --y-ink:#8a5f00;
+  --r-band:#d6463a; --r-band-ink:#ffffff; --r-ink:#ad2318;
+  --g-band:#379654; --g-band-ink:#ffffff; --g-ink:#17652f;
+  --w-band:#dce1e7; --w-band-ink:#353f4a; --w-ink:#1f2c38;
+  --c10-hi:#f4f5f7; --c10-lo:#a7acb4; --c10-edge:#868b93; --c10-ink:#353a41;
+  --c50-hi:#fbe9a6; --c50-lo:#c8982c; --c50-edge:#a27a1b; --c50-ink:#553b00;
+  --bill-a:#e7685b; --bill-b:#b8372d; --bill-edge:#93281f; --bill-ink:#fff6ee;
+  --font-card:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
+  --font-ui:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --hand-w:50px; --hand-h:82px; --hand-f:36px; --ui:20px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1a15; --felt:#173024; --panel:#1b2f26; --ink:#e8f1eb; --muted:#a3b8ab; --line:#33503f;
+    --accent:#e3a548; --accent-ink:#1d1405; --hu:#e0554a; --hu-ink:#ffffff; --sel:#ffb02e; --on:#5cc495;
+    --chi:#5b9be0; --chi-ink:#0b1622; --pass:#2c4237; --pass-ink:#e8f1eb; --go:#4fb886; --go-ink:#06140d;
+    --win:#5cc98d; --lose:#f07a6f;
+    --scrim:rgba(0,0,0,.6); --shadow:rgba(0,0,0,.45);
+    --card-bg:#f1e9d5; --card-edge:#8f866f; --back:#8c3a2c; --back-line:#c66a5b;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1a15; --felt:#173024; --panel:#1b2f26; --ink:#e8f1eb; --muted:#a3b8ab; --line:#33503f;
+  --accent:#e3a548; --accent-ink:#1d1405; --hu:#e0554a; --hu-ink:#ffffff; --sel:#ffb02e; --on:#5cc495;
+  --chi:#5b9be0; --chi-ink:#0b1622; --pass:#2c4237; --pass-ink:#e8f1eb; --go:#4fb886; --go-ink:#06140d;
+  --win:#5cc98d; --lose:#f07a6f;
+  --scrim:rgba(0,0,0,.6); --shadow:rgba(0,0,0,.45);
+  --card-bg:#f1e9d5; --card-edge:#8f866f; --back:#8c3a2c; --back-line:#c66a5b;
+  color-scheme:dark;
+}
+:root.big{--hand-w:58px; --hand-h:94px; --hand-f:42px; --ui:22px}
+
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--font-ui); font-size:var(--ui); line-height:1.4; -webkit-user-select:none; user-select:none}
+input{-webkit-user-select:text; user-select:text}
+button{font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
+
+#app{max-width:720px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:10px 16px; display:flex; flex-direction:column; gap:12px}
+
+.top{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.brand{font:900 26px/1 var(--font-card); letter-spacing:.04em}
+.meta{flex:1; min-width:0; color:var(--muted); font-size:16px; font-weight:500}
+.tbtn{font:700 17px var(--font-ui); padding:8px 14px; border-radius:10px; border:2px solid var(--line); background:var(--panel); color:var(--ink)}
+
+.opps{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
+.opps.n3{grid-template-columns:repeat(2, minmax(0,1fr))}
+.opp{background:var(--panel); border:3px solid transparent; border-radius:14px; padding:8px; min-width:0; display:flex; flex-direction:column; gap:6px}
+.opp.on{border-color:var(--on); animation:glow 1.2s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 0 0 transparent} to{box-shadow:0 0 0 4px var(--on)}}
+.opp-h{display:flex; align-items:center; gap:6px; min-width:0}
+.av{flex:none; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font:900 18px var(--font-card)}
+.av1{background:var(--g-band); color:var(--g-band-ink)}
+.av2{background:var(--r-band); color:var(--r-band-ink)}
+.av3{background:var(--y-band); color:var(--y-band-ink)}
+.av0{background:var(--w-band); color:var(--w-band-ink)}
+.av{position:relative; overflow:hidden}
+.av img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.av.lg{width:64px; height:64px; font-size:32px}
+.vc-dot{display:inline-grid; place-items:center; width:20px; height:20px; border-radius:50%; background:var(--go); color:var(--go-ink); vertical-align:-3px}
+.vc-dot svg{width:13px; height:13px}
+.tbtn.vc{display:inline-flex; align-items:center; gap:4px}
+.tbtn.vc svg{width:20px; height:20px}
+.tbtn.vc.on{background:var(--go); color:var(--go-ink); border-color:var(--go)}
+.big-btn.line{background:#06C755; color:#fff; min-height:84px}
+.big-btn.vcb.on{background:var(--go); color:var(--go-ink); border-color:var(--go)}
+.me-av{display:inline-flex; align-items:center; gap:8px}
+.me-av .av{width:30px; height:30px; font-size:16px}
+.prof{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; background:var(--felt); font-weight:900; font-size:20px}
+.oname{font-weight:900; font-size:17px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.osub{font-size:14px; color:var(--muted); line-height:1.2}
+.ocash{display:flex; align-items:center; gap:4px; font:900 15px var(--font-ui); font-variant-numeric:tabular-nums}
+.mini{display:flex; flex-wrap:wrap; gap:2px}
+.mini .grp{display:flex; gap:1px; margin-right:3px}
+.olabel{font-size:12px; color:var(--muted); letter-spacing:.06em}
+.tag{display:inline-block; font-size:11px; font-weight:900; padding:1px 5px; border-radius:6px; background:var(--chi); color:var(--chi-ink); vertical-align:2px}
+
+.center{background:var(--felt); border-radius:18px; padding:14px; display:flex; align-items:center; justify-content:center; gap:22px; min-height:150px}
+.cwrap{display:flex; flex-direction:column; align-items:center; gap:4px}
+.who{font-size:18px; font-weight:700; text-align:center}
+.pile{display:flex; flex-direction:column; align-items:center; gap:6px; font-size:16px; color:var(--muted)}
+.pile b{color:var(--ink); font-size:22px; font-variant-numeric:tabular-nums}
+.back{width:44px; height:72px; border-radius:6px; background:var(--back); box-shadow:3px 3px 0 var(--back-line), 6px 6px 0 var(--back); border:2px solid var(--back-line)}
+
+.sect{display:flex; flex-direction:column; gap:8px}
+.mehead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.slabel{font-size:16px; color:var(--muted); font-weight:700}
+.melds{display:flex; flex-wrap:wrap; gap:8px}
+.meld{display:flex; align-items:flex-end; gap:2px; padding:5px; background:var(--felt); border-radius:10px}
+.hand{display:flex; flex-direction:column; gap:12px; padding:14px 8px 10px; border-radius:16px; border:3px solid transparent}
+.hand.on{border-color:var(--on); background:var(--panel)}
+.row{display:flex; flex-wrap:wrap; gap:6px}
+
+/* money */
+.money{display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap}
+.money .m{display:inline-flex; align-items:center; gap:2px}
+.money .x{font:900 15px var(--font-ui); font-variant-numeric:tabular-nums}
+.coin{display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font:900 11px/1 var(--font-ui); flex:none; letter-spacing:-.02em}
+.c10{width:24px; height:24px; background:radial-gradient(circle at 35% 30%, var(--c10-hi), var(--c10-lo)); color:var(--c10-ink); border:1.5px solid var(--c10-edge)}
+.c50{width:29px; height:29px; background:radial-gradient(circle at 35% 30%, var(--c50-hi), var(--c50-lo)); color:var(--c50-ink); border:1.5px solid var(--c50-edge); font-size:12px}
+.bill{display:inline-flex; align-items:center; justify-content:flex-end; padding-right:5px; width:46px; height:24px; border-radius:3px; flex:none; background:linear-gradient(120deg, var(--bill-a), var(--bill-b)); color:var(--bill-ink); border:1px solid var(--bill-edge); font:900 12px/1 var(--font-ui); position:relative}
+.bill::before{content:""; position:absolute; left:5px; top:4px; width:13px; height:14px; border-radius:50%; border:1.5px solid var(--bill-ink); opacity:.55}
+.money.sm .c10{width:18px; height:18px; font-size:8px} .money.sm .c50{width:21px; height:21px; font-size:9px} .money.sm .bill{width:34px; height:18px; font-size:9px} .money.sm .bill::before{width:9px; height:10px; top:3px; left:4px}
+.money.sm .x{font-size:13px}
+.cashbox{display:flex; align-items:center; gap:8px; padding:4px 10px; border-radius:12px; background:var(--panel); border:2px solid var(--line); font:900 18px var(--font-ui); font-variant-numeric:tabular-nums}
+.plus{color:var(--win)} .minus{color:var(--lose)}
+.payrow{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px solid var(--line); flex-wrap:wrap}
+.payrow .pn{font-weight:900; font-size:18px}
+.payrow .pv{display:flex; align-items:center; gap:8px; font:900 20px var(--font-ui); font-variant-numeric:tabular-nums}
+
+/* cards */
+.card{--w:50px; --h:82px; --f:36px; width:var(--w); height:var(--h); flex:none; position:relative; display:flex; flex-direction:column; align-items:stretch; padding:0; border-radius:6px; background:var(--card-bg); border:1px solid var(--card-edge); box-shadow:0 2px 3px var(--shadow); font-family:var(--font-card); transition:transform .15s ease, box-shadow .15s ease; color:inherit}
+.card .band{height:calc(var(--h)*.2); display:flex; align-items:center; justify-content:center; font:700 calc(var(--f)*.42)/1 var(--font-ui); border-radius:5px 5px 0 0}
+.card .ch{flex:1; display:flex; align-items:center; justify-content:center; font-size:var(--f); font-weight:900; line-height:1}
+.card.lg{--w:var(--hand-w); --h:var(--hand-h); --f:var(--hand-f)}
+.card.md{--w:66px; --h:108px; --f:48px}
+.card.ml{--w:32px; --h:52px; --f:21px}
+.card.bt{--w:26px; --h:42px; --f:18px; box-shadow:none}
+.card.sm{--w:19px; --h:31px; --f:13px; border-radius:3px; box-shadow:none}
+.card.sm .band,.card.bt .band{font-size:0; border-radius:2px 2px 0 0}
+.card.y .band{background:var(--y-band); color:var(--y-band-ink)} .card.y .ch{color:var(--y-ink)}
+.card.r .band{background:var(--r-band); color:var(--r-band-ink)} .card.r .ch{color:var(--r-ink)}
+.card.g .band{background:var(--g-band); color:var(--g-band-ink)} .card.g .ch{color:var(--g-ink)}
+.card.w .band{background:var(--w-band); color:var(--w-band-ink)} .card.w .ch{color:var(--w-ink)}
+.card.sel{transform:translateY(-14px); box-shadow:0 0 0 4px var(--sel), 0 8px 14px var(--shadow)}
+.card .new{position:absolute; top:-9px; right:-9px; width:18px; height:18px; border-radius:50%; background:var(--hu); border:2px solid var(--card-bg)}
+.card.hl{animation:drop .35s ease-out}
+@keyframes drop{from{transform:translateY(-14px) scale(1.06)} to{transform:none}}
+
+/* action bar */
+.bar{position:sticky; bottom:0; z-index:5; background:var(--panel); border-top:1px solid var(--line); box-shadow:0 -4px 14px var(--shadow)}
+.bar-in{max-width:720px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:8px 12px; display:flex; flex-direction:column; gap:8px}
+#msg{font-size:17px; font-weight:700; color:var(--muted); min-height:1.4em; text-wrap:balance}
+#actions{display:flex; gap:8px}
+.act{flex:1; min-height:84px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font:900 16px var(--font-ui); border-radius:16px; border:none; background:var(--felt); color:var(--ink); padding:6px}
+.act .pic{display:flex; align-items:center; gap:3px}
+.act .al{font-size:14px; opacity:.85}
+.act svg{width:34px; height:34px}
+.act.primary{background:var(--accent); color:var(--accent-ink)}
+.act.hu{background:var(--hu); color:var(--hu-ink); animation:beat 1s ease-in-out infinite}
+@keyframes beat{50%{transform:scale(1.04)}}
+.act.chi{background:var(--chi); color:var(--chi-ink)}
+.act.pass{background:var(--pass); color:var(--pass-ink)}
+.act.ghost{background:transparent; border:2px solid var(--line); flex:0 0 76px}
+.act:disabled{opacity:.35; cursor:default}
+.wait{flex:1; min-height:84px; display:flex; align-items:center; justify-content:center; gap:10px; color:var(--muted); font-size:17px; border:2px dashed var(--line); border-radius:16px}
+.dots span{display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--muted); margin:0 3px; animation:dot 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s} .dots span:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.25} 40%{opacity:1}}
+
+/* sheets */
+.modal{position:fixed; inset:0; z-index:20; background:var(--scrim); display:flex; align-items:center; justify-content:center; padding:16px}
+.sheet{background:var(--panel); color:var(--ink); border-radius:20px; width:100%; max-width:520px; max-height:92%; overflow:auto; padding:22px 20px; display:flex; flex-direction:column; gap:14px; box-shadow:0 12px 40px var(--shadow)}
+.sheet h2{margin:0; font:900 30px/1.2 var(--font-card); text-wrap:balance}
+.sheet h3{margin:10px 0 0; font-size:21px; padding-top:10px; border-top:2px solid var(--line)}
+.sheet p{margin:0}
+.sheet ul{margin:0; padding-left:1.2em; display:flex; flex-direction:column; gap:6px}
+.big-btn{min-height:66px; font:900 24px var(--font-ui); border-radius:14px; border:none; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; gap:10px; padding-inline:12px}
+.big-btn svg{width:34px; height:34px; flex:none}
+.big-btn.alt{background:transparent; color:var(--ink); border:2px solid var(--line); font-size:19px; min-height:56px}
+.big-btn.go{background:var(--go); color:var(--go-ink); min-height:96px; font-size:28px}
+.big-btn.go svg{width:48px; height:48px}
+.big-btn.net{background:var(--chi); color:var(--chi-ink); min-height:80px}
+.big-btn.net svg{width:42px; height:42px}
+.big-btn:disabled{opacity:.4}
+.muted{color:var(--muted)}
+.sub{display:block; font-size:15px; color:var(--muted); font-weight:500}
+.note{background:var(--felt); border-radius:12px; padding:10px 12px; font-weight:700}
+.code{font:900 44px/1 var(--font-ui); letter-spacing:.12em; text-align:center; font-variant-numeric:tabular-nums; padding:12px; border-radius:14px; background:var(--felt)}
+.seats{display:flex; flex-direction:column; gap:8px}
+.seatrow{display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:12px; background:var(--felt); font-weight:900}
+.seatrow .sub{display:inline; margin-left:auto}
+.stat{display:flex; gap:18px; flex-wrap:wrap; font-size:18px}
+.stat b{font-size:26px; font-variant-numeric:tabular-nums}
+.glist{display:flex; flex-direction:column; gap:8px}
+.grow{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.grow .cards{display:flex; gap:2px}
+.grow .lab{font-size:17px; font-weight:700}
+.total{font-size:24px; font-weight:900}
+.field{display:flex; flex-direction:column; gap:6px}
+.field > span{font-weight:700}
+.field input{font:700 22px var(--font-ui); padding:10px 12px; border-radius:12px; border:2px solid var(--line); background:var(--bg); color:var(--ink); width:100%}
+.field input.codein{font-size:34px; letter-spacing:.2em; text-align:center}
+.seg{display:flex; gap:6px; flex-wrap:wrap}
+.seg button{flex:1 1 0; min-width:70px; min-height:52px; font:700 18px var(--font-ui); border-radius:12px; border:2px solid var(--line); background:transparent; color:var(--ink); padding:4px 6px}
+.seg button.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+.stepper{display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid var(--line)}
+.stepper .sl{flex:1; min-width:0; font-weight:700; font-size:18px}
+.stepper .ctl{display:flex; align-items:center; gap:6px}
+.stepper button{width:48px; height:48px; border-radius:12px; border:2px solid var(--line); background:transparent; color:var(--ink); font:900 26px/1 var(--font-ui)}
+.stepper .v{min-width:2.6em; text-align:center; font:900 22px var(--font-ui); font-variant-numeric:tabular-nums}
+.ptable{width:100%; border-collapse:collapse; font-size:18px}
+.ptable td{padding:6px 4px; border-bottom:1px solid var(--line)}
+.ptable td:last-child{text-align:right; font-weight:900; white-space:nowrap}
+.opt{display:flex; align-items:center; gap:12px; padding:12px; border-radius:14px; border:2px solid var(--line); background:transparent; color:var(--ink); font:700 18px var(--font-ui); text-align:left}
+.opt .cards{display:flex; gap:3px}
+.opt .card{--w:44px; --h:72px; --f:31px}
+
+/* recorder */
+.recbox{display:flex; flex-direction:column; align-items:center; gap:10px; background:var(--felt); border-radius:16px; padding:16px}
+.rec-n{font-size:16px; color:var(--muted); font-weight:700; text-align:center}
+.rec-tw{font:900 34px/1.2 var(--font-card); text-align:center}
+.rec-btn{width:150px; height:150px; border-radius:50%; border:none; background:var(--hu); color:var(--hu-ink); font:900 22px var(--font-ui); touch-action:none; -webkit-touch-callout:none; box-shadow:0 6px 16px var(--shadow)}
+.rec-btn.on{animation:rec 1s ease-in-out infinite}
+@keyframes rec{50%{transform:scale(1.08)}}
+.rec-row{display:flex; gap:8px; width:100%}
+.rec-row .big-btn{flex:1; min-height:56px; font-size:19px}
+.rec-list{display:flex; flex-wrap:wrap; gap:6px}
+.rli{font:700 16px var(--font-ui); padding:6px 10px; border-radius:10px; border:2px solid var(--line); background:transparent; color:var(--ink)}
+.rli.ok{border-color:var(--on); color:var(--on)}
+.rli.cur{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
+
+@media (prefers-reduced-motion: reduce){ .card{transition:none} .card.hl,.act.hu,.opp.on,.rec-btn.on,.dots span{animation:none} }
+</style>
+
+<main id="app">
+  <header class="top">
+    <div class="brand">四色牌</div>
+    <div class="meta" id="meta"></div>
+    <button class="tbtn vc" id="btnVc" type="button" hidden></button>
+    <button class="tbtn" id="btnRules" type="button">規則</button>
+    <button class="tbtn" id="btnSet" type="button">設定</button>
+  </header>
+  <section class="opps" id="opps" aria-label="牌友"></section>
+  <section class="center" id="center" aria-live="polite"></section>
+  <section class="sect" id="meldSect" hidden>
+    <div class="slabel">亮出的牌</div>
+    <div class="melds" id="melds"></div>
+  </section>
+  <section class="sect">
+    <div class="mehead"><div class="slabel" id="handLabel"></div><div class="cashbox" id="myCash"></div></div>
+    <div class="hand" id="hand"></div>
+  </section>
+</main>
+<div class="bar"><div class="bar-in">
+  <div id="msg" aria-live="polite"></div>
+  <div id="actions"></div>
+</div></div>
+<div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+
+<script>
+/*ENGINE-START*/
+const COLORS=['黃','紅','綠','白'];
+const CKEY=['y','r','g','w'];
+const RANKS=['將','士','象','車','馬','包','卒'];
+const DEFAULT_RULES={
+  players:4, hand:20, dealerExtra:true,
+  openDraw:false, chi:'next', peng:true,
+  singleJiang:true, pairs:false, mixTrio:false, mixZu:false,
+  minPts:0, zimo:0, dealerBonus:0,
+  base:10, perTai:10, payMode:'shooter', startChips:1000,
+  pts:{'單將':1,'將士象':1,'車馬包':1,'三卒':1,'四卒':2,'坎':3,'四張':6,'對子':0,'碰':1}
+};
+const clone=o=>JSON.parse(JSON.stringify(o));
+let R=clone(DEFAULT_RULES);          // rules of the game being played
+const S={name:'奶奶',speed:0,level:'easy',sound:true,big:false,room:'',lastRoom:''};
+const tC=t=>Math.floor(t/7), tR=t=>t%7, tName=t=>COLORS[tC(t)]+RANKS[tR(t)];
+const ZU=[6,13,20,27];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function makeDeck(){const d=[];let id=0;for(let t=0;t<28;t++)for(let k=0;k<4;k++)d.push({id:id++,t});return shuffle(d);}
+function counts(cards,extra){const c=new Array(28).fill(0);for(const x of cards)c[x.t]++;if(extra!=null)c[extra]++;return c;}
+function multisets(cnt,pool,k){
+  const res=[],cur=[];
+  (function rec(s){
+    if(cur.length===k){res.push(cur.slice());return;}
+    for(let j=s;j<pool.length;j++){const x=pool[j];if(cnt[x]>0){cnt[x]--;cur.push(x);rec(j);cur.pop();cnt[x]++;}}
+  })(0);
+  return res;
+}
+const trioOf=r=>r<=2?0:(r<=5?3:-1);
+
+// Best way to split every card into valid groups (max points), or null if impossible.
+const MEMO=new Map();
+function solve(cnt){
+  const key=cnt.join('');
+  if(MEMO.has(key))return MEMO.get(key);
+  let i=0;while(i<28&&cnt[i]===0)i++;
+  if(i===28){const r={pts:0,groups:[]};MEMO.set(key,r);return r;}
+  let best=null;
+  const P=R.pts;
+  const tryG=(types,kind)=>{
+    const pts=P[kind]||0;
+    for(const x of types)cnt[x]--;
+    const r=solve(cnt);
+    for(const x of types)cnt[x]++;
+    if(r&&(!best||r.pts+pts>best.pts))best={pts:r.pts+pts,groups:[{types,kind,pts}].concat(r.groups)};
+  };
+  const n=cnt[i],c=tC(i),r=tR(i);
+  if(n>=4)tryG([i,i,i,i],'四張');
+  if(n>=3)tryG([i,i,i],'坎');
+  if(n>=2&&R.pairs)tryG([i,i],'對子');
+  if(r===0&&R.singleJiang)tryG([i],'單將');
+  const tb=trioOf(r);
+  if(tb>=0){
+    const kind=tb===0?'將士象':'車馬包';
+    if(!R.mixTrio){if(r===tb&&cnt[i+1]&&cnt[i+2])tryG([i,i+1,i+2],kind);}
+    else{
+      const o=[tb,tb+1,tb+2].filter(x=>x!==r);
+      for(let c1=0;c1<4;c1++)for(let c2=0;c2<4;c2++){const a=c1*7+o[0],b=c2*7+o[1];if(cnt[a]>0&&cnt[b]>0)tryG([i,a,b],kind);}
+    }
+  }
+  if(r===6){
+    if(!R.mixZu){
+      const oc=[];for(let c2=c+1;c2<4;c2++)if(cnt[c2*7+6])oc.push(c2*7+6);
+      for(let a=0;a<oc.length;a++)for(let b=a+1;b<oc.length;b++)tryG([i,oc[a],oc[b]],'三卒');
+      if(oc.length===3)tryG([i,...oc],'四卒');
+    }else{
+      cnt[i]--;
+      const pool=ZU.filter(x=>x>=i),gs=[];
+      for(const k of [2,3])for(const m of multisets(cnt,pool,k)){const g=[i,...m];if(!g.every(x=>x===i))gs.push([g,k===2?'三卒':'四卒']);}
+      cnt[i]++;
+      for(const [g,kind] of gs)tryG(g,kind);
+    }
+  }
+  if(MEMO.size>300000)MEMO.clear();
+  MEMO.set(key,best);return best;
+}
+function canWin(pl,extra,bonus){
+  const sol=solve(counts(pl.hand,extra));
+  if(!sol)return null;
+  const mp=pl.melds.reduce((a,m)=>a+m.pts,0);
+  const total=sol.pts+mp+(bonus||0);
+  if(total<R.minPts)return null;
+  return {total,groups:sol.groups,bonus:bonus||0};
+}
+function chiOptions(hand,t){
+  const cnt=counts(hand),c=tC(t),r=tR(t),opts=[],seen=new Set();
+  const add=(use,kind)=>{const k=kind+':'+use.slice().sort((a,b)=>a-b).join(',');if(seen.has(k))return;seen.add(k);opts.push({use,kind,pts:R.pts[kind]||0});};
+  if(r===0&&R.singleJiang)add([],'單將');
+  const tb=trioOf(r);
+  if(tb>=0){
+    const kind=tb===0?'將士象':'車馬包',o=[tb,tb+1,tb+2].filter(x=>x!==r);
+    if(!R.mixTrio){const need=o.map(x=>c*7+x);if(need.every(x=>cnt[x]>0))add(need,kind);}
+    else for(let c1=0;c1<4;c1++)for(let c2=0;c2<4;c2++){const a=c1*7+o[0],b=c2*7+o[1];if(cnt[a]>0&&cnt[b]>0)add([a,b],kind);}
+  }
+  if(r===6){
+    if(!R.mixZu){
+      const oc=[0,1,2,3].filter(x=>x!==c&&cnt[x*7+6]>0).map(x=>x*7+6);
+      for(let a=0;a<oc.length;a++)for(let b=a+1;b<oc.length;b++)add([oc[a],oc[b]],'三卒');
+      if(oc.length===3)add(oc,'四卒');
+    }else{
+      for(const k of [2,3])for(const m of multisets(cnt,ZU,k)){if(m.every(x=>x===t))continue;add(m,k===2?'三卒':'四卒');}
+    }
+  }
+  return opts;
+}
+function usefulness(cnt,t){
+  const c=tC(t),r=tR(t);let s=0;
+  const same=cnt[t];
+  if(same>=3)s+=12;else if(same===2)s+=R.pairs?7:(R.peng?4:2);
+  if(r===0&&R.singleJiang)s+=7;
+  const tb=trioOf(r);
+  if(tb>=0){
+    const has=x=>R.mixTrio?[0,1,2,3].some(cc=>cnt[cc*7+x]>0):cnt[c*7+x]>0;
+    const o=[tb,tb+1,tb+2].filter(x=>x!==r&&has(x)).length;
+    s+=o===2?10:o===1?3:0;
+  }
+  if(r===6){
+    const o=R.mixZu?ZU.reduce((a,x)=>a+cnt[x],0)-1:[0,1,2,3].filter(x=>x!==c&&cnt[x*7+6]>0).length;
+    s+=o>=2?9:o===1?3:0;
+  }
+  return s;
+}
+function pickDiscard(hand,mode){
+  const cnt=counts(hand);
+  const types=[...new Set(hand.map(c=>c.t))];
+  const scored=types.map(t=>({t,s:usefulness(cnt,t)+(mode==='hint'?0:Math.random()*0.5)})).sort((a,b)=>a.s-b.s);
+  let pick=scored[0];
+  if(mode==='ai'&&S.level==='easy'&&Math.random()<0.12){
+    const half=scored.slice(0,Math.max(1,Math.ceil(scored.length/2)));
+    pick=half[Math.floor(Math.random()*half.length)];
+  }
+  return hand.find(c=>c.t===pick.t);
+}
+function aiKeep(hand,t){return usefulness(counts(hand,t),t)>=7;}
+function aiWantsPeng(pl,t){
+  if(!R.peng)return false;
+  const n=pl.hand.filter(c=>c.t===t).length;
+  if(n!==2)return false;
+  return Math.random()<(S.level==='easy'?0.8:0.9);
+}
+function aiChooseChi(pl,opts){
+  if(!opts.length)return null;
+  if(Math.random()>(S.level==='easy'?0.75:0.85))return null;
+  const cnt=counts(pl.hand);
+  const ok=opts.filter(o=>o.use.every(x=>cnt[x]<3));
+  if(!ok.length)return null;
+  return ok.sort((a,b)=>b.pts-a.pts)[0];
+}
+// Money moved when player p wins: base + perTai × 台.
+function settleAmounts(N,p,from,total){
+  const amt=R.base+R.perTai*total,delta=new Array(N).fill(0);
+  const payers=from==null||R.payMode==='all'?[...Array(N).keys()].filter(q=>q!==p):[from];
+  for(const q of payers){delta[q]-=amt;delta[p]+=amt;}
+  return {amt,delta};
+}
+/*ENGINE-END*/
+
+const $=s=>document.querySelector(s);
+const ABORT={abort:1};
+const AI_SET={4:[null,['阿珠嬸','珠','av1'],['阿土伯','土','av2'],['阿花姨','花','av3']],3:[null,['阿珠嬸','珠','av1'],['阿花姨','花','av3']]};
+const SEATS={4:['','下家','對家','上家'],3:['','下家','上家']};
+const KL={'單將':'單張將','將士象':'將士象','車馬包':'車馬包','三卒':'三張卒','四卒':'四張卒','坎':'坎','四張':'四張一樣','對子':'對子','碰':'碰'};
+let SAVED=clone(DEFAULT_RULES);       // rules being edited; used from the next deal
+let G=null, GID=0, ROUND=0, NEXT_DEALER=0, STARTED=false;
+let STATS={games:0,wins:[0,0,0,0],pts:[0,0,0,0],draws:0};
+let CHIPS=[1000,1000,1000,1000];      // offline wallets: grandma + computer friends
+
+const ICON={
+  mic:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="8.5" y="2" width="7" height="12.5" rx="3.5"/><path d="M5 11a7 7 0 0 0 14 0h-2.2a4.8 4.8 0 0 1-9.6 0z"/><rect x="11" y="17.5" width="2" height="3.5"/><rect x="7.5" y="20" width="9" height="2" rx="1"/></svg>',
+  micOff:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="8.5" y="2" width="7" height="12.5" rx="3.5" opacity=".45"/><path d="M5 11a7 7 0 0 0 14 0h-2.2a4.8 4.8 0 0 1-9.6 0z" opacity=".45"/><rect x="11" y="17.5" width="2" height="3.5"/><rect x="7.5" y="20" width="9" height="2" rx="1"/><path d="M3.3 2.6 21.4 20.7l-1.5 1.5L1.8 4.1z"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V5M5 12l7-7 7 7"/></svg>',
+  down:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v15M5 12l7 7 7-7"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  bulb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg>',
+  play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z" fill="currentColor"/></svg>',
+  again:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5"/></svg>',
+  people:'<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="8" cy="7" r="3.2"/><circle cx="16.5" cy="8" r="2.7"/><path d="M1.5 19.5c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6v.5h-13z"/><path d="M15.2 20v-.5c0-1.9-.7-3.6-1.9-4.8.9-.5 2-.8 3.2-.8 3 0 5.5 2 5.5 5.2v.9z"/></svg>',
+  fan:'<svg viewBox="0 0 48 36" aria-hidden="true" style="width:52px;height:38px"><g fill="currentColor"><rect x="9" y="9" width="11" height="22" rx="2" transform="rotate(-20 14 31)"/><rect x="18.5" y="7" width="11" height="22" rx="2"/><rect x="28" y="9" width="11" height="22" rx="2" transform="rotate(20 34 31)"/><path d="M24 0l1.6 3.4 3.4 1.6-3.4 1.6L24 10l-1.6-3.4L19 5l3.4-1.6z"/><path d="M41 2l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/><path d="M7 2l1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/></g></svg>'
+};
+
+const store={
+  get(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+function loadPrefs(){
+  const s=store.get('ssp-settings'); if(s&&typeof s==='object')Object.assign(S,s);
+  const st=store.get('ssp-stats'); if(st&&Array.isArray(st.wins))STATS=Object.assign({pts:[0,0,0,0]},st);
+  const r=store.get('ssp-rules');
+  if(r&&typeof r==='object'){SAVED=Object.assign(clone(DEFAULT_RULES),r);SAVED.pts=Object.assign(clone(DEFAULT_RULES.pts),r.pts||{});}
+  else if(s){if(typeof s.pairs==='boolean')SAVED.pairs=s.pairs;if(typeof s.minPts==='number')SAVED.minPts=s.minPts;}
+  const ch=store.get('ssp-chips');
+  CHIPS=Array.isArray(ch)&&ch.length===4?ch.map(x=>+x||0):[0,1,2,3].map(()=>SAVED.startChips);
+  document.documentElement.classList.toggle('big',!!S.big);
+}
+function savePrefs(){store.set('ssp-settings',S);}
+function saveRules(){store.set('ssp-rules',SAVED);}
+function saveChips(){store.set('ssp-chips',CHIPS);}
+
+/* ---------- money (NT$10 coin, NT$50 coin, NT$100 bill) ---------- */
+const fmt=n=>Math.abs(n).toLocaleString('en-US');
+function moneyHTML(a,cls){
+  a=Math.max(0,Math.round(Math.abs(a)/10)*10);
+  const n100=Math.floor(a/100),n50=Math.floor((a%100)/50),n10=Math.floor((a%50)/10);
+  const part=(n,icon)=>n?`<span class="m">${icon}${n>1?`<span class="x">×${n}</span>`:''}</span>`:'';
+  const inner=part(n100,'<span class="bill">100</span>')+part(n50,'<span class="coin c50">50</span>')+part(n10,'<span class="coin c10">10</span>');
+  return `<span class="money ${cls||''}" aria-label="${a} 元">${inner||'<span class="x">0</span>'}</span>`;
+}
+let AC=null;
+function coinSound(){
+  if(!S.sound)return;
+  try{
+    const A=window.AudioContext||window.webkitAudioContext;if(!A)return;
+    AC=AC||new A();const now=AC.currentTime;
+    [1318,1568,2093,2637].forEach((f,i)=>{
+      const o=AC.createOscillator(),g=AC.createGain(),t0=now+i*0.11;
+      o.type='triangle';o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(0.25,t0+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t0+0.4);
+      o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+0.45);
+    });
+  }catch(e){}
+}
+
+/* ---------- voice: recorded Taiwanese clips first, Mandarin speech as fallback ---------- */
+const LINES=[
+  ['start','開始矣，來拍牌！','開始囉，來打牌'],
+  ['turn','換你矣','換你了'],
+  ['canhu','你會使胡矣！','可以胡了'],
+  ['ask_hu','欲胡無？','要胡嗎'],
+  ['ask_peng','欲碰無？','要碰嗎'],
+  ['ask_chi','欲食無？','要吃嗎'],
+  ['ask_keep','欲收起來無？','要收起來嗎'],
+  ['pick','閣揤一擺就拍出去','再按一下就打出去'],
+  ['hint','拍這張','打這張'],
+  ['pass','無愛','不要'],
+  ['peng','碰！','碰'],
+  ['chi','食！','吃'],
+  ['hu_me','恭喜！你胡矣！','恭喜你胡了'],
+  ['hu_ai','予人胡去矣','別人胡了'],
+  ['draw','流局，無人胡','流局，沒人胡'],
+  ['joined','有人來矣！','有人加入了'],
+];
+const VOICE=[...LINES.map(([k,tw,zh])=>({k,tw,zh,t:null})),...Array.from({length:28},(_,t)=>({k:'c'+t,tw:tName(t),zh:tName(t),t}))];
+const VMAP=Object.fromEntries(VOICE.map(v=>[v.k,v]));
+const NATIVE=(typeof window.Native==='object'&&window.Native)||null;
+let CLIPS=new Set();
+function refreshClips(){if(!NATIVE)return;try{CLIPS=new Set(JSON.parse(NATIVE.clips()));}catch(e){}}
+let ZHVOICE=null;
+function pickVoice(){try{const vs=speechSynthesis.getVoices();ZHVOICE=vs.find(v=>/zh[-_]TW/i.test(v.lang))||vs.find(v=>/zh/i.test(v.lang))||null;}catch(e){}}
+if(!NATIVE&&'speechSynthesis' in window){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
+function say(keys,interrupt){
+  if(!S.sound)return;
+  if(!Array.isArray(keys))keys=[keys];
+  const items=keys.map(k=>[k,VMAP[k]?VMAP[k].zh:'']);
+  if(NATIVE){try{NATIVE.say(JSON.stringify(items),!!interrupt);}catch(e){}return;}
+  if(!('speechSynthesis' in window))return;
+  try{
+    if(interrupt)speechSynthesis.cancel();
+    for(const [,zh] of items){if(!zh)continue;const u=new SpeechSynthesisUtterance(zh);u.lang='zh-TW';if(ZHVOICE)u.voice=ZHVOICE;u.rate=0.85;speechSynthesis.speak(u);}
+  }catch(e){}
+}
+const ck=t=>'c'+t;
+
+let WL=null;
+async function keepAwake(){try{if(navigator.wakeLock)WL=await navigator.wakeLock.request('screen');}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&G&&!G.over)keepAwake();});
+
+/* ---------- game state helpers ---------- */
+const delay=()=>[1800,1100,600][S.speed]||1100;
+function sleep(ms){const gid=G.id;return new Promise((res,rej)=>setTimeout(()=>{if(!G||G.id!==gid)rej(ABORT);else res();},ms));}
+function waitHuman(w){return new Promise(res=>{G.waiting={...w,resolve:v=>{G.waiting=null;res(v);render();}};render();});}
+const sortHand=pl=>pl.hand.sort((a,b)=>a.t-b.t||a.id-b.id);
+const nameOf=i=>G.players[i].name;
+const NP=()=>G.players.length;
+const nextOf=p=>(p+1)%NP();
+const isAI=s=>G.players[s].kind==='ai';
+const dealerBonus=p=>p===G.dealer?R.dealerBonus:0;
+function announce(t){G.msg=t;render();}
+function promptSeat(s,t){G.pm[s]=t;render();}
+function sayTo(s,keys,intr){const pl=G.players[s];if(!pl)return;if(pl.kind==='local')say(keys,intr);else if(pl.kind==='remote')netSend(pl.conn,{type:'say',keys,intr:!!intr});}
+function sayAll(keys,intr){G.players.forEach((_,s)=>sayTo(s,keys,intr));}
+const bank=()=>NET.mode==='host'&&NET.chips?NET.chips:CHIPS;
+function chipsOf(i){return G.guest?G.players[i].chips:bank()[i];}
+
+function seatPlan(N){
+  const plan=[{kind:'local',name:S.name,av:S.name[0]||'我',avc:'av0',pic:myPic()}];
+  for(let i=1;i<N;i++){
+    const g=NET.mode==='host'?NET.guests.find(x=>x.open&&x.seat===i):null;
+    if(g)plan.push({kind:'remote',name:g.name,av:g.name[0]||'客',avc:'av'+i,conn:g.conn,pic:g.pic||''});
+    else{const [n,av,avc]=AI_SET[N][i];plan.push({kind:'ai',name:n,av,avc});}
+  }
+  return plan;
+}
+function newGame(dealer){
+  R=clone(SAVED);MEMO.clear();
+  const N=R.players;
+  if(dealer>=N)dealer=0;
+  GID++;ROUND++;
+  const deck=makeDeck();
+  const players=seatPlan(N).map((p,i)=>({i,...p,hand:[],melds:[],discards:[]}));
+  for(let k=0;k<R.hand;k++)for(const p of players)p.hand.push(deck.pop());
+  if(R.dealerExtra)players[dealer].hand.push(deck.pop());
+  players.forEach(sortHand);
+  G={id:GID,players,pile:deck,dealer,turn:dealer,last:null,shown:null,waiting:null,sel:null,selAt:0,newIds:{},drawnT:{},over:false,msg:'',pm:{},picks:0,refilled:[]};
+  const b=bank();
+  for(let i=0;i<N;i++)if(!(b[i]>0)){b[i]=R.startChips;G.refilled.push(i);}
+  if(NET.mode!=='host')saveChips();else{CHIPS[0]=b[0];saveChips();}
+  G.msg=`${players[dealer].name} 是莊家`+(G.refilled.length?`。${G.refilled.map(i=>players[i].name).join('、')} 的錢用完了，補回 ${R.startChips} 元`:'');
+  if(NET.mode==='host'){
+    for(const g of NET.guests)if(g.open&&g.seat>=N){netSend(g.conn,{type:'full'});g.open=false;}
+    for(const p of players)if(p.kind==='remote')netSend(p.conn,{type:'start',rules:R});
+  }
+  render();
+}
+async function runGame(){try{await gameLoop();}catch(e){if(e!==ABORT)console.error(e);}}
+
+/* Ask a person for a decision; a remote seat that drops out is played by the computer. */
+const PENDING=new Map();let ASKID=0;
+function askSeat(s,w){
+  const pl=G.players[s];
+  if(pl.kind==='local')return waitHuman(w);
+  if(pl.kind==='remote'&&pl.conn&&pl.conn.open){
+    return new Promise(res=>{const id=++ASKID;PENDING.set(id,{res,seat:s,w,conn:pl.conn});netSend(pl.conn,{type:'ask',id,w});render();});
+  }
+  return Promise.resolve(aiAnswer(s,w));
+}
+function aiAnswer(s,w){
+  const pl=G.players[s];
+  if(w.kind==='discard'){if(w.canHu)return {type:'hu'};return {type:'discard',id:pickDiscard(pl.hand,'ai').id};}
+  if(w.kind==='drawn'){if(w.canHu)return {type:'hu'};return {type:aiKeep(pl.hand,w.t)?'keep':'pass'};}
+  if(w.canHu)return {type:'hu'};
+  if(w.canPeng&&aiWantsPeng(pl,w.t))return {type:'peng'};
+  const o=aiChooseChi(pl,w.chiOpts||[]);
+  return o?{type:'chi',opt:o}:{type:'pass'};
+}
+
+async function gameLoop(){
+  let p=G.dealer,draw=!R.dealerExtra,claimed=false;
+  for(;;){
+    if(draw){
+      claimed=false;
+      if(!G.pile.length){endDraw();return;}
+      const pl=G.players[p];G.turn=p;G.last=null;
+      const card=G.pile.pop();
+      if(R.openDraw){
+        const bonus=R.zimo+dealerBonus(p);
+        const win=canWin(pl,card.t,bonus);
+        G.shown={p,t:card.t};sayAll(ck(card.t),true);
+        let keep;
+        if(isAI(p)){
+          announce(`${pl.name} 摸到 ${tName(card.t)}`);
+          await sleep(delay());
+          if(win){G.shown=null;endWin(p,card.t,null,bonus);return;}
+          keep=aiKeep(pl.hand,card.t);
+        }else{
+          announce(`${pl.name} 摸到 ${tName(card.t)}`);
+          promptSeat(p,`摸到 ${tName(card.t)}，要收起來嗎？`);
+          await sleep(600);sayTo(p,win?'canhu':'ask_keep');
+          const r=await askSeat(p,{kind:'drawn',t:card.t,canHu:!!win});delete G.pm[p];
+          if(r.type==='hu'&&win){G.shown=null;endWin(p,card.t,null,bonus);return;}
+          keep=r.type==='keep';
+        }
+        G.shown=null;
+        if(keep){
+          pl.hand.push(card);sortHand(pl);
+          if(!isAI(p)){G.newIds[p]=card.id;G.drawnT[p]=null;}
+          announce(`${pl.name} 收起來`);
+        }else{
+          pl.discards.push(card.t);G.last={p,t:card.t,rej:true};
+          announce(`${pl.name} 不要 ${tName(card.t)}`);
+          const nx=await afterRelease(p,card.t);if(!nx)return;
+          p=nx.p;draw=nx.draw;claimed=nx.claimed;continue;
+        }
+      }else{
+        pl.hand.push(card);sortHand(pl);
+        if(!isAI(p)){G.newIds[p]=card.id;G.drawnT[p]=card.t;if(p===0)G.sel=null;}
+        announce(`${pl.name} 摸牌…`);
+        if(isAI(p))await sleep(delay()*0.5);
+      }
+    }
+    const bonus=(claimed?0:R.zimo)+dealerBonus(p);
+    const res=await discardPhase(p,bonus);
+    if(res.hu){endWin(p,null,null,bonus);return;}
+    const nx=await afterRelease(p,res.card.t);if(!nx)return;
+    p=nx.p;draw=nx.draw;claimed=nx.claimed;
+  }
+}
+async function afterRelease(d,t){
+  const cl=await claimPhase(d,t);
+  if(cl.type==='hu'){endWin(cl.p,t,d,dealerBonus(cl.p));return null;}
+  if(cl.type==='peng'||cl.type==='chi'){await applyClaim(cl,d,t);return {p:cl.p,draw:false,claimed:true};}
+  return {p:nextOf(d),draw:true,claimed:false};
+}
+function doDiscard(p,card){
+  const pl=G.players[p];
+  pl.hand.splice(pl.hand.indexOf(card),1);
+  pl.discards.push(card.t);
+  G.last={p,t:card.t};G.newIds[p]=null;G.drawnT[p]=null;if(p===0)G.sel=null;
+  sayAll(ck(card.t),true);
+}
+async function discardPhase(p,bonus){
+  const pl=G.players[p];G.turn=p;
+  const win=canWin(pl,null,bonus);
+  if(isAI(p)){
+    if(!G.msg.includes('摸'))announce(`${pl.name} 想牌中…`);else render();
+    await sleep(delay());
+    if(win)return {hu:true};
+    const card=pickDiscard(pl.hand,'ai');
+    doDiscard(p,card);announce(`${pl.name} 打出 ${tName(card.t)}`);
+    return {card};
+  }
+  const pre=G.drawnT[p]!=null?`摸到 ${tName(G.drawnT[p])}。`:'';
+  announce(`輪到 ${pl.name}`);
+  promptSeat(p,win?pre+'可以胡了！按紅色的胡':pre+'點一張牌，再點一次就打出去');
+  sayTo(p,win?'canhu':'turn');
+  const r=await askSeat(p,{kind:'discard',canHu:!!win});delete G.pm[p];
+  if(r&&r.type==='hu'&&win)return {hu:true};
+  let card=r&&r.type==='discard'?pl.hand.find(c=>c.id===r.id):null;
+  if(!card)card=pickDiscard(pl.hand,'ai');
+  doDiscard(p,card);announce(`${pl.name} 打出 ${tName(card.t)}`);
+  return {card};
+}
+async function claimPhase(d,t){
+  const P=G.players,N=NP(),order=Array.from({length:N-1},(_,k)=>(d+k+1)%N);
+  const opts={};
+  for(const q of order){
+    const hu=!!canWin(P[q],t,dealerBonus(q));
+    const peng=R.peng&&P[q].hand.filter(c=>c.t===t).length>=2;
+    const chi=(R.chi==='any'||(R.chi==='next'&&q===order[0]))?chiOptions(P[q].hand,t):[];
+    if(hu||peng||chi.length)opts[q]={hu,peng,chi};
+  }
+  const LV=a=>a.type==='hu'?3:a.type==='peng'?2:a.type==='chi'?1:0;
+  let best=null;
+  const consider=(q,a)=>{const lv=LV(a),pos=order.indexOf(q);if(!lv)return;if(!best||lv>best.lv||(lv===best.lv&&pos<best.pos))best={...a,p:q,lv,pos};};
+  for(const q of order)if(opts[q]&&isAI(q)){const o=opts[q];consider(q,aiAnswer(q,{kind:'claim',t,canHu:o.hu,canPeng:o.peng,chiOpts:o.chi}));}
+  let waited=false;
+  for(const q of order){
+    if(!opts[q]||isAI(q))continue;
+    const o=opts[q],pos=order.indexOf(q);
+    const allow=lv=>!best||lv>best.lv||(lv===best.lv&&pos<best.pos);
+    const w={kind:'claim',t,canHu:o.hu&&allow(3),canPeng:o.peng&&allow(2),chiOpts:allow(1)?o.chi:[]};
+    if(!w.canHu&&!w.canPeng&&!w.chiOpts.length)continue;
+    if(!waited){await sleep(400);waited=true;}
+    const can=[w.canHu&&'胡',w.canPeng&&'碰',w.chiOpts.length&&'吃'].filter(Boolean).join('、');
+    promptSeat(q,`${P[d].name} ${G.last&&G.last.rej?'不要':'打出'} ${tName(t)}，可以${can}`);
+    sayTo(q,w.canHu?'ask_hu':w.canPeng?'ask_peng':'ask_chi');
+    let a=await askSeat(q,w)||{type:'pass'};delete G.pm[q];
+    if(a.type==='hu'&&!w.canHu)a={type:'pass'};
+    if(a.type==='peng'&&!w.canPeng)a={type:'pass'};
+    if(a.type==='chi'){
+      const k=x=>x.kind+':'+x.use.slice().sort((m,n)=>m-n).join(',');
+      const m=a.opt&&w.chiOpts.find(x=>k(x)===k(a.opt));
+      a=m?{type:'chi',opt:m}:{type:'pass'};
+    }
+    if(a.type==='pass')sayTo(q,'pass',true);
+    consider(q,a);
+  }
+  if(!best)return {type:'none'};
+  if(isAI(best.p))await sleep(delay()*0.6);
+  return best;
+}
+function removeTypes(pl,types){for(const t of types){const i=pl.hand.findIndex(c=>c.t===t);if(i>=0)pl.hand.splice(i,1);}}
+async function applyClaim(cl,d,t){
+  const P=G.players,pl=P[cl.p];
+  P[d].discards.pop();
+  if(cl.type==='peng'){
+    removeTypes(pl,[t,t]);
+    pl.melds.push({types:[t,t,t],kind:'碰',pts:R.pts['碰']||0});
+    sayAll('peng',true);G.msg=`${pl.name} 碰 ${tName(t)}`;
+  }else{
+    removeTypes(pl,cl.opt.use);
+    pl.melds.push({types:[...cl.opt.use,t].sort((a,b)=>a-b),kind:cl.opt.kind,pts:cl.opt.pts});
+    sayAll('chi',true);G.msg=`${pl.name} 吃 ${tName(t)}，湊成${KL[cl.opt.kind]}`;
+  }
+  G.last=null;G.turn=cl.p;G.newIds[cl.p]=null;G.drawnT[cl.p]=null;
+  render();
+  if(isAI(cl.p))await sleep(delay()*0.6);
+}
+
+function endWin(p,t,from,bonus){
+  const pl=G.players[p],N=NP();
+  const w=canWin(pl,t,bonus);
+  if(t!=null){if(from!=null)G.players[from].discards.pop();pl.hand.push({id:-1,t});sortHand(pl);}
+  G.over=true;G.turn=-1;G.last=null;G.shown=null;G.waiting=null;G.pm={};
+  const {amt,delta}=settleAmounts(N,p,from,w.total);
+  const b=bank();for(let i=0;i<N;i++)b[i]+=delta[i];
+  if(NET.mode==='host')CHIPS[0]=b[0];
+  saveChips();
+  if(p===0||NET.mode!=='host'){STATS.games++;STATS.wins[p]++;STATS.pts[p]=(STATS.pts[p]||0)+w.total;}
+  else STATS.games++;
+  store.set('ssp-stats',STATS);
+  NEXT_DEALER=p;
+  G.result={kind:'win',p,t,from,w,amt,delta};
+  G.msg=`${pl.name} 胡了`;
+  G.players.forEach((_,s)=>sayTo(s,s===p?'hu_me':'hu_ai',true));
+  render();
+  showResult();
+}
+function endDraw(){
+  G.over=true;G.turn=-1;G.waiting=null;G.shown=null;G.pm={};
+  STATS.games++;STATS.draws++;store.set('ssp-stats',STATS);
+  NEXT_DEALER=G.dealer;
+  G.result={kind:'draw'};
+  G.msg='流局';sayAll('draw',true);render();
+  showResult();
+}
+function showResult(){
+  openSheet(resultHTML(0));
+  if(G.result.kind==='win'&&G.result.p===0)coinSound();
+  for(const pl of G.players)if(pl.kind==='remote')netSend(pl.conn,{type:'result',html:resultHTML(pl.i),coin:G.result.kind==='win'&&G.result.p===pl.i});
+}
+function resultHTML(s){
+  const Rz=G.result,host=s===0;
+  const nm=i=>i===s?'你':G.players[i].name;
+  const tail=host?`<button class="big-btn go" type="button" data-go="again" aria-label="再來一局">${ICON.again}</button><button class="big-btn alt" type="button" data-go="netLeave">${NET.mode==='host'?'關掉房間，回主畫面':'回主畫面'}</button>`:`<div class="note">等 ${esc(G.players[0].name)} 開下一局…</div>`;
+  if(Rz.kind==='draw')return `<h2>流局</h2><p>牌摸完了，這局沒有人胡牌。莊家不變。</p>${tail}`;
+  const pl=G.players[Rz.p],w=Rz.w,self=Rz.from==null;
+  const how=self?'自己摸到的（自摸）':`胡 ${nm(Rz.from)} ${'打出'}的 ${tName(Rz.t)}`;
+  let rows=w.groups.map(g=>groupRow(g.types,KL[g.kind],g.pts)).join('')+pl.melds.map(m=>groupRow(m.types,KL[m.kind]+'（亮牌）',m.pts)).join('');
+  if(self&&R.zimo&&w.bonus)rows+=`<div class="grow"><span class="lab">自摸 · ${R.zimo} 台</span></div>`;
+  if(Rz.p===G.dealer&&R.dealerBonus)rows+=`<div class="grow"><span class="lab">莊家 · ${R.dealerBonus} 台</span></div>`;
+  const pay=G.players.map((x,i)=>{const d=Rz.delta[i];return `<div class="payrow"><span class="pn">${esc(nm(i))}</span><span class="pv ${d>0?'plus':d<0?'minus':''}">${d?`${d>0?'+':'−'}${fmt(d)}`:'0'} ${d?moneyHTML(d):''}</span></div>`;}).join('');
+  return `<h2>${Rz.p===s?'恭喜你，胡了！':`${esc(pl.name)} 胡了`}</h2>
+    <p class="muted">${how}</p>
+    <div class="glist">${rows}</div>
+    <div class="total">共 ${w.total} 台 · ${self||R.payMode==='all'?'每家付':`${esc(nm(Rz.from))}付`} ${fmt(Rz.amt)} 元</div>
+    <div>${pay}</div>
+    ${tail}`;
+}
+function startNew(dealer){closeSheet();newGame(dealer);keepAwake();runGame();}
+
+/* ---------- rendering ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function cardHTML(t,cls,extra){
+  return `<span class="card ${CKEY[tC(t)]} ${cls||''}" aria-label="${tName(t)}"><span class="band">${COLORS[tC(t)]}</span><span class="ch">${RANKS[tR(t)]}</span>${extra||''}</span>`;
+}
+function groupRow(types,label,pts){
+  return `<div class="grow"><span class="cards">${types.map(t=>cardHTML(t,'ml')).join('')}</span><span class="lab">${label}${pts?` · ${pts} 台`:''}</span></div>`;
+}
+function statHTML(){
+  return `<div class="stat"><span>${esc(S.name)} 胡了 <b>${STATS.wins[0]}</b> 次</span><span>總共 <b>${STATS.games}</b> 局</span></div><div class="cashbox">錢筒 ${moneyHTML(CHIPS[0])} <span>${fmt(CHIPS[0])} 元</span></div>`;
+}
+function actBtn(cls,act,pic,label,disabled){
+  return `<button class="act ${cls}" type="button" data-act="${act}" aria-label="${label}" ${disabled?'disabled':''}><span class="pic">${pic}</span><span class="al">${label}</span></button>`;
+}
+let SYNC=null;
+function render(){
+  if(!G)return;
+  const N=NP();
+  G.players[0].name=G.guest?G.players[0].name:S.name;
+  if(!G.guest)G.players[0].pic=myPic();
+  $('#meta').textContent=`第 ${ROUND} 局 · 莊家：${nameOf(G.dealer)}${NET.mode?' · 連線中':''}`;
+  const opps=$('#opps');opps.className='opps'+(N===3?' n3':'');
+  const idx=[];for(let i=N-1;i>=1;i--)idx.push(i);
+  opps.innerHTML=idx.map(i=>{
+    const pl=G.players[i],on=G.turn===i&&!G.over;
+    const melds=pl.melds.map(m=>`<span class="grp">${m.types.map(t=>cardHTML(t,'sm')).join('')}</span>`).join('');
+    const disc=pl.discards.slice(-8).map(t=>cardHTML(t,'sm')).join('');
+    const c=chipsOf(i);
+    return `<div class="opp${on?' on':''}">
+      <div class="opp-h">${avHTML(pl)}<div style="min-width:0"><div class="oname">${talking(i)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span> `:''}${esc(pl.name)}${pl.kind==='remote'?' <span class="tag">家人</span>':''}</div><div class="osub">${SEATS[N][i]} · ${pl.hand.length} 張${G.dealer===i?' · 莊':''}</div></div></div>
+      <div class="ocash"><span class="coin c10" aria-hidden="true">10</span>${fmt(c||0)}</div>
+      ${melds?`<div class="olabel">亮牌</div><div class="mini">${melds}</div>`:''}
+      ${disc?`<div class="olabel">打過</div><div class="mini">${disc}</div>`:''}
+    </div>`;
+  }).join('');
+  const pile=`<div class="pile"><div class="back" aria-hidden="true"></div><div>牌堆 <b>${G.pile.length}</b></div></div>`;
+  const who=i=>i===0?'你':esc(nameOf(i));
+  if(G.shown)$('#center').innerHTML=`<div class="cwrap"><div class="who">${who(G.shown.p)} 摸到</div>${cardHTML(G.shown.t,'md hl')}</div>${pile}`;
+  else if(G.last)$('#center').innerHTML=`<div class="cwrap"><div class="who">${who(G.last.p)} ${G.last.rej?'不要':'打出'}</div>${cardHTML(G.last.t,'md hl')}</div>${pile}`;
+  else $('#center').innerHTML=`<div class="cwrap"><div class="who">${G.over?'這局結束':(G.turn>=0?`輪到 ${who(G.turn)}`:'')}</div></div>${pile}`;
+  const me=G.players[0];
+  $('#meldSect').hidden=!me.melds.length;
+  $('#melds').innerHTML=me.melds.map(m=>`<div class="meld">${m.types.map(t=>cardHTML(t,'ml')).join('')}</div>`).join('');
+  $('#handLabel').innerHTML=`<span class="me-av">${avHTML(me)}${talking(0)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:''}<span>${esc(me.name)}的牌 · ${me.hand.length} 張${G.dealer===0?' · 莊家':''}</span></span>`;
+  const mc=chipsOf(0)||0;
+  $('#myCash').innerHTML=`${moneyHTML(mc)}<span>${fmt(mc)}</span>`;
+  const choosing=G.waiting&&G.waiting.kind==='discard';
+  $('#hand').className='hand'+(G.turn===0&&!G.over?' on':'');
+  const newId=G.newIds[0];
+  let rows='';
+  for(let c=0;c<4;c++){
+    const cs=me.hand.filter(x=>tC(x.t)===c);
+    if(!cs.length)continue;
+    rows+=`<div class="row">${cs.map(x=>{
+      const sel=G.sel===x.id?' sel':'';
+      return `<button type="button" class="card lg ${CKEY[c]}${sel}" data-id="${x.id}" aria-label="${tName(x.t)}" ${choosing?'':'tabindex="-1"'}><span class="band">${COLORS[c]}</span><span class="ch">${RANKS[tR(x.t)]}</span>${newId!=null&&newId===x.id?'<span class="new" aria-label="新摸的"></span>':''}</button>`;
+    }).join('')}</div>`;
+  }
+  $('#hand').innerHTML=rows;
+  $('#msg').textContent=G.pm[0]||G.msg;
+  const w=G.waiting;let a='';
+  if(!w){a=G.over?`<div class="wait">這局結束</div>`:`<div class="wait"><span class="dots"><span></span><span></span><span></span></span></div>`;}
+  else if(w.kind==='discard'){
+    if(w.canHu)a+=actBtn('hu','hu',ICON.fan,'胡');
+    const selCard=G.sel!=null?me.hand.find(x=>x.id===G.sel):null;
+    a+=actBtn('primary','discard',(selCard?cardHTML(selCard.t,'bt'):'')+ICON.up,'打出',!selCard);
+    a+=actBtn('ghost','hint',ICON.bulb,'提示');
+  }else if(w.kind==='drawn'){
+    if(w.canHu)a+=actBtn('hu','hu',ICON.fan,'胡');
+    a+=actBtn('primary','keep',cardHTML(w.t,'bt')+ICON.down,'收起來');
+    a+=actBtn('pass','pass',ICON.x,'不要');
+  }else if(w.kind==='claim'){
+    if(w.canHu)a+=actBtn('hu','hu',ICON.fan,'胡');
+    if(w.canPeng)a+=actBtn('primary','peng',[w.t,w.t,w.t].map(t=>cardHTML(t,'bt')).join(''),'碰');
+    if(w.chiOpts.length){
+      const pic=w.chiOpts.length===1?[...w.chiOpts[0].use,w.t].sort((x,y)=>x-y).map(t=>cardHTML(t,'bt')).join(''):cardHTML(w.t,'bt')+'<span style="font-size:24px">…</span>';
+      a+=actBtn('chi','chi',pic,'吃');
+    }
+    a+=actBtn('pass','pass',ICON.x,'不要');
+  }
+  $('#actions').innerHTML=a;
+  renderVc();
+  if(NET.mode==='host'&&!SYNC)SYNC=setTimeout(syncGuests,30);
+}
+
+/* ---------- input ---------- */
+$('#hand').addEventListener('click',e=>{
+  const b=e.target.closest('.card');if(!b||!G.waiting||G.waiting.kind!=='discard')return;
+  const id=+b.dataset.id;
+  if(G.sel===id&&Date.now()-G.selAt>350){G.waiting.resolve({type:'discard',id});return;}
+  G.sel=id;G.selAt=Date.now();render();
+  const c=G.players[0].hand.find(x=>x.id===id);
+  if(c){G.pm[0]=`選了 ${tName(c.t)}，再點一次就打出去`;render();G.picks++;say(G.picks<=2?[ck(c.t),'pick']:[ck(c.t)],true);}
+});
+$('#actions').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b||!G.waiting)return;
+  const w=G.waiting,act=b.dataset.act;
+  if(act==='hu')w.resolve({type:'hu'});
+  else if(act==='discard'&&G.sel!=null)w.resolve({type:'discard',id:G.sel});
+  else if(act==='keep')w.resolve({type:'keep'});
+  else if(act==='hint'){const c=pickDiscard(G.players[0].hand,'hint');G.sel=c.id;G.selAt=Date.now();G.pm[0]=`建議打出 ${tName(c.t)}，再點一次就打出去`;render();say(['hint',ck(c.t)],true);}
+  else if(act==='peng')w.resolve({type:'peng'});
+  else if(act==='pass')w.resolve({type:'pass'});
+  else if(act==='chi'){
+    if(w.chiOpts.length===1)w.resolve({type:'chi',opt:w.chiOpts[0]});
+    else openSheet(`<h2>要怎麼吃？</h2>${w.chiOpts.map((o,i)=>`<button class="opt" type="button" data-chi="${i}"><span class="cards">${[...o.use,w.t].sort((a,b)=>a-b).map(t=>cardHTML(t)).join('')}</span></button>`).join('')}<button class="big-btn alt" type="button" data-go="close" aria-label="先不要">${ICON.x}</button>`);
+  }
+});
+
+/* ---------- online play (PeerJS public matchmaking; host's phone runs the game) ---------- */
+const NET={mode:null,peer:null,guests:[],conn:null,chips:null,lobby:false,retry:0,vroster:new Set(),hostName:'',names:[]};
+const PEER_PREFIX='sisepai-tw-room-';
+const canNet=()=>!!NATIVE||location.hostname==='localhost'||location.hostname==='127.0.0.1'||WEB_HOST;
+const canHost=()=>!WEBLINE; // rooms are opened on grandma's Android app, which can check everyone's LINE
+function roomCode(){if(!/^\d{6}$/.test(S.room||'')){S.room=String(Math.floor(100000+Math.random()*900000));savePrefs();}return S.room;}
+function loadPeer(){
+  return new Promise((res,rej)=>{
+    if(window.Peer)return res();
+    const s=document.createElement('script');s.src='peerjs.min.js';
+    s.onload=()=>window.Peer?res():rej(new Error('no peer'));s.onerror=()=>rej(new Error('load'));
+    document.head.appendChild(s);
+  });
+}
+function netSend(conn,msg){try{if(conn&&conn.open)conn.send(msg);}catch(e){}}
+function netReset(){
+  if(NET.mode==='host')for(const g of NET.guests)netSend(g.conn,{type:'bye'});
+  vcStop(false);
+  try{if(NET.peer)NET.peer.destroy();}catch(e){}
+  for(const [,pd] of PENDING)try{pd.res({type:'pass'});}catch(e){}
+  PENDING.clear();
+  Object.assign(NET,{mode:null,peer:null,guests:[],conn:null,chips:null,lobby:false,retry:0,vroster:new Set(),hostName:'',names:[]});
+  renderVc();
+}
+function netError(t){
+  openSheet(`<h2>連線有問題</h2><p>${t}</p><button class="big-btn" type="button" data-go="netLeave">回主畫面</button>`);
+}
+function netLeave(){netReset();STARTED=false;ROUND=0;closeSheet();newGame(0);showWelcome();}
+function netUnavailable(){
+  openSheet(`<h2>連線打牌</h2><p>連線打牌要在 Android App 裡才能用，網頁版沒辦法連線。</p><button class="big-btn" type="button" data-go="close">知道了</button>`);
+}
+async function hostRoom(){
+  if(!canNet())return netUnavailable();
+  openSheet(`<h2>開房間</h2><p>準備中…</p>`);
+  try{await loadPeer();}catch(e){return netError('沒辦法載入連線功能，請重新打開 App。');}
+  netReset();
+  NET.mode='host';NET.lobby=true;
+  const open=()=>{
+    const peer=new Peer(PEER_PREFIX+roomCode(),{debug:0});
+    NET.peer=peer;
+    peer.on('open',()=>{NET.retry=0;if(NET.lobby)openLobby();});
+    peer.on('connection',conn=>{
+      conn.on('data',m=>hostOnData(conn,m));
+      conn.on('close',()=>hostOnClose(conn));
+      conn.on('error',()=>hostOnClose(conn));
+    });
+    peer.on('call',vcIncoming);
+    peer.on('disconnected',()=>{try{if(NET.peer===peer&&!peer.destroyed)peer.reconnect();}catch(e){}});
+    peer.on('error',err=>{
+      if(NET.peer!==peer)return;
+      if(err.type==='peer-unavailable')return; // a voice call to someone who just left
+      if(err.type==='unavailable-id'&&NET.retry<6){NET.retry++;try{peer.destroy();}catch(e){}if(NET.lobby)openSheet(`<h2>開房間</h2><p>房間還在整理，請等一下…（${NET.retry}）</p>`);setTimeout(()=>{if(NET.mode==='host')open();},4000);return;}
+      if(['network','server-error','socket-error','socket-closed','unavailable-id','browser-incompatible'].includes(err.type)){
+        if(NET.lobby)netError(err.type==='browser-incompatible'?'這支手機不支援連線打牌。':'連不上網路。請確認手機有開網路，再試一次。');
+        else announce('網路不穩，連線可能中斷');
+      }
+    });
+  };
+  open();
+}
+function openLobby(){
+  if(!NET.lobby)return;
+  const N=SAVED.players;
+  const vdot=on=>on?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:'';
+  const rows=[`<div class="seatrow">${avHTML({avc:'av0',av:S.name[0]||'我',pic:myPic()})}${vdot(VC.on)}${esc(S.name)}<span class="sub">房主</span></div>`];
+  for(let i=1;i<N;i++){
+    const g=NET.guests.find(x=>x.open&&x.seat===i);
+    rows.push(g?`<div class="seatrow">${avHTML({avc:'av'+i,av:g.name[0],pic:g.pic})}${vdot(NET.vroster.has(g.conn.peer))}${esc(g.name)}<span class="sub">家人 · 已連上</span></div>`
+               :`<div class="seatrow"><span class="av ${AI_SET[N][i][2]}">${AI_SET[N][i][1]}</span>${AI_SET[N][i][0]}<span class="sub">電腦（等人加入）</span></div>`);
+  }
+  openSheet(`<h2>開房間</h2>
+    <p class="muted">請家人在自己的手機打開四色牌 App，按「加入家人的房間」，輸入這個號碼：</p>
+    <div class="code" aria-label="房間號碼">${roomCode()}</div>
+    <div class="seats">${rows.join('')}</div>
+    <p class="muted">沒人加入的位子，會由電腦陪打。人到了就可以開始。</p>
+    ${vcBtnHTML()}
+    <button class="big-btn go" type="button" data-go="netStart" aria-label="開始打牌">${ICON.play}</button>
+    <button class="big-btn alt" type="button" data-go="netLeave">關掉房間</button>`);
+}
+function lobbyNames(){return NET.guests.filter(g=>g.open).map(g=>g.name);}
+async function hostOnData(conn,m){
+  if(!m||typeof m!=='object')return;
+  if(m.type==='hello'){
+    const reject=t=>{netSend(conn,{type:t});setTimeout(()=>{try{conn.close();}catch(e){}},800);};
+    if(conn.__hello)return;conn.__hello=true;
+    if(!NET.lobby&&G&&!G.over)return reject('busy');
+    let pic='',uid='',lineName='';
+    if(lineReady()){
+      if(!m.line)return reject('needline');
+      const r=await lineCall('verify',{token:String(m.line)});
+      if(!r.ok)return reject(r.err==='net'?'linenet':'badline');
+      pic=safePic(r.pictureUrl);uid=r.userId;lineName=r.displayName||'';
+    }
+    if(!conn.open||NET.mode!=='host')return;
+    if(!NET.lobby&&G&&!G.over)return reject('busy');
+    const N=SAVED.players,taken=NET.guests.filter(g=>g.open).map(g=>g.seat);
+    let seat=null;for(let i=1;i<N;i++)if(!taken.includes(i)){seat=i;break;}
+    if(seat==null)return reject('full');
+    const name=String(m.name||lineName||'家人').replace(/[<>&"]/g,'').trim().slice(0,6)||'家人';
+    NET.guests.push({conn,name,seat,open:true,pic,uid});
+    netSend(conn,{type:'vroster',ids:[...NET.vroster]});
+    say('joined',true);
+    netSend(conn,{type:'welcome',host:S.name});
+    for(const g of NET.guests)if(g.open)netSend(g.conn,{type:'lobby',host:S.name,names:lobbyNames()});
+    if(NET.lobby)openLobby();
+    else if(G&&G.over)openSheet(resultHTML(0).replace('</h2>',`</h2><div class="note">${esc(name)} 加入了，下一局會一起打</div>`));
+  }else if(m.type==='answer'){
+    const pd=PENDING.get(m.id);
+    if(pd&&pd.conn===conn){PENDING.delete(m.id);pd.res(m.v&&typeof m.v==='object'?m.v:{type:'pass'});}
+  }else if(m.type==='voice'){
+    if(NET.guests.some(g=>g.open&&g.conn===conn))hostVoice(conn.peer,!!m.on);
+  }
+}
+function hostOnClose(conn){
+  const g=NET.guests.find(x=>x.conn===conn);if(!g||!g.open)return;
+  g.open=false;
+  if(NET.vroster.has(conn.peer))hostVoice(conn.peer,false);
+  if(G&&!G.guest){
+    const pl=G.players.find(x=>x.conn===conn);
+    if(pl){
+      pl.kind='ai';pl.conn=null;
+      for(const [id,pd] of PENDING)if(pd.conn===conn){PENDING.delete(id);pd.res(aiAnswer(pd.seat,pd.w));}
+      announce(`${pl.name} 斷線了，電腦先幫忙打`);
+    }
+  }
+  if(NET.lobby)openLobby();
+}
+function hostStart(){
+  NET.lobby=false;STARTED=true;
+  NET.chips=[CHIPS[0],...Array(3).fill(SAVED.startChips)];
+  ROUND=0;say('start',true);startNew(0);
+}
+function viewFor(s){
+  const N=NP(),real=v=>(v+s)%N,rot=i=>(i-s+N)%N,b=bank();
+  return {N,round:ROUND,dealer:rot(G.dealer),turn:G.turn>=0?rot(G.turn):-1,over:G.over,
+    last:G.last?{p:rot(G.last.p),t:G.last.t,rej:!!G.last.rej}:null,
+    shown:G.shown?{p:rot(G.shown.p),t:G.shown.t}:null,
+    pile:G.pile.length,msg:G.pm[s]||G.msg,newId:G.newIds[s]??null,
+    players:Array.from({length:N},(_,v)=>{const pl=G.players[real(v)];return {name:pl.name,av:pl.av,avc:pl.avc,kind:pl.kind,pic:pl.pic||'',vc:talking(real(v)),hand:v===0?pl.hand:pl.hand.length,melds:pl.melds,discards:pl.discards,chips:b[real(v)]};})};
+}
+function syncGuests(){
+  SYNC=null;
+  if(NET.mode!=='host'||!G)return;
+  for(const pl of G.players)if(pl.kind==='remote')netSend(pl.conn,{type:'view',v:viewFor(pl.i)});
+}
+
+/* guest side */
+function openJoin(){
+  if(!canNet())return netUnavailable();
+  openSheet(`<h2>加入家人的房間</h2>
+    <label class="field" for="joinName"><span>你的名字</span><input id="joinName" maxlength="6" value="${esc(S.name==='奶奶'?'':S.name)}" placeholder="例如：小明"></label>
+    <label class="field" for="joinCode"><span>房間號碼（6 個數字）</span><input id="joinCode" class="codein" inputmode="numeric" maxlength="6" value="${esc(S.lastRoom||'')}" placeholder="000000"></label>
+    <p class="muted">房間號碼在房主手機的「開房間」畫面上。房主要先按「開房間」，你才連得上。</p>
+    <button class="big-btn net" type="button" data-go="netJoin">${ICON.people}加入</button>
+    <button class="big-btn alt" type="button" data-go="close">取消</button>`);
+}
+async function joinRoom(){
+  const name=($('#joinName').value||'').replace(/[<>&"]/g,'').trim().slice(0,6);
+  const code=($('#joinCode').value||'').replace(/\D/g,'');
+  if(!name){$('#joinName').focus();return;}
+  if(code.length!==6){$('#joinCode').focus();return;}
+  S.name=name;S.lastRoom=code;savePrefs();
+  openSheet(`<h2>連線中…</h2><p>正在找房間 ${code}</p><button class="big-btn alt" type="button" data-go="netLeave">取消</button>`);
+  try{await loadPeer();}catch(e){return netError('沒辦法載入連線功能，請重新打開 App。');}
+  let token=null;
+  if(lineReady()){
+    const r=await lineCall('fresh');
+    if(!r.ok){
+      if(r.err==='expired'){LINE_PROF=null;return showLogin('LINE 登入過期了，請再登入一次，然後重新加入。');}
+      return netError('沒辦法跟 LINE 確認身分，請檢查網路再試一次。');
+    }
+    token=r.token;if(r.profile)setProfile(r.profile);
+  }
+  netReset();
+  NET.mode='guest';
+  const peer=new Peer(PEER_PREFIX+'g-'+Math.random().toString(36).slice(2,12),{debug:0});
+  NET.peer=peer;
+  let opened=false;
+  peer.on('call',vcIncoming);
+  peer.on('open',()=>{
+    const conn=peer.connect(PEER_PREFIX+code,{reliable:true,serialization:'json'});
+    NET.conn=conn;
+    conn.on('open',()=>{opened=true;netSend(conn,{type:'hello',name:S.name,line:token});});
+    conn.on('data',guestOnData);
+    conn.on('close',()=>{if(NET.mode==='guest'&&NET.conn===conn)netError(opened?'連線中斷了。可以回主畫面再加入一次。':'連不上這個房間。');});
+    setTimeout(()=>{if(NET.mode==='guest'&&!opened)netError('連不上。請確認房間號碼，或請房主先按「開房間」，再試一次。');},20000);
+  });
+  peer.on('error',err=>{
+    if(NET.peer!==peer)return;
+    if(opened&&err.type==='peer-unavailable')return; // a voice call to someone who just left
+    if(err.type==='peer-unavailable')netError('找不到這個房間。請確認號碼，或請房主先按「開房間」。');
+    else if(!opened)netError('連線失敗，請檢查網路再試一次。');
+  });
+}
+function guestOnData(m){
+  if(!m||typeof m!=='object')return;
+  if(m.type==='welcome'||m.type==='lobby'){
+    if(m.host)NET.hostName=m.host;
+    if(m.names)NET.names=m.names;
+    if(!STARTED)guestWait();
+  }else if(m.type==='vroster'){vcApply(Array.isArray(m.ids)?m.ids.map(String):[]);if(!STARTED&&!$('#modal').hidden&&$('#vcLobby'))guestWait();}
+  else if(m.type==='needline')netError('要先用 LINE 登入，才能加入房間。');
+  else if(m.type==='badline')netError('LINE 身分確認沒有通過。請到「設定」重新登入 LINE，再加入一次。');
+  else if(m.type==='linenet')netError('房主的手機連不上 LINE 確認身分，請等一下再試。');
+  else if(m.type==='full')netError('房間已經坐滿了。');
+  else if(m.type==='busy')netError('他們正在打牌，等這局打完再加入一次。');
+  else if(m.type==='bye')netError('房主關掉房間了。');
+  else if(m.type==='start'){R=m.rules;MEMO.clear();STARTED=true;closeSheet();}
+  else if(m.type==='view')applyView(m.v);
+  else if(m.type==='ask'){
+    if(!G)return;
+    G.waiting={...m.w,resolve:v=>{netSend(NET.conn,{type:'answer',id:m.id,v});G.waiting=null;render();}};
+    render();
+  }
+  else if(m.type==='say')say(m.keys,m.intr);
+  else if(m.type==='result'){openSheet(m.html);if(m.coin)coinSound();}
+}
+function guestWait(){
+  openSheet(`<h2>已經連上了</h2><p>等 ${esc(NET.hostName||'房主')} 按開始…</p>${NET.names&&NET.names.length?`<p class="muted">一起打的家人：${NET.names.map(esc).join('、')}</p>`:''}
+    <div id="vcLobby">${vcBtnHTML()}</div>
+    <button class="big-btn alt" type="button" data-go="netLeave">離開</button>`);
+}
+function applyView(v){
+  const keep=G&&G.guest?{sel:G.sel,selAt:G.selAt,waiting:G.waiting,picks:G.picks}:{sel:null,selAt:0,waiting:null,picks:0};
+  ROUND=v.round;
+  G={guest:true,id:GID,players:v.players.map((p,i)=>({i,kind:i===0?'local':p.kind,name:p.name,av:p.av,avc:p.avc,pic:safePic(p.pic),vc:!!p.vc,hand:i===0?p.hand:Array.from({length:p.hand},()=>({t:0,id:-1})),melds:p.melds,discards:p.discards,chips:p.chips})),
+    pile:{length:v.pile},dealer:v.dealer,turn:v.turn,last:v.last,shown:v.shown,over:v.over,msg:v.msg,pm:{},newIds:{0:v.newId},drawnT:{},...keep};
+  if(G.sel!=null&&!G.players[0].hand.some(c=>c.id===G.sel))G.sel=null;
+  render();
+}
+
+/* ---------- LINE login (Android app only; Java does the OAuth + token checks) ---------- */
+let LINE_CFG=null,LINE_PROF=null,LOGIN_SKIP=false,LOGIN_FAILED=false;
+/* Web version (GitHub Pages, opened from LINE): LIFF gives the LINE profile and an access token, no secret needed. */
+const LIFF_ID='2012460632-doyqgajB';
+const WEB_HOST=/\.github\.io$/.test(location.hostname);
+const WEBLINE=!NATIVE&&WEB_HOST&&/^\d+-\w+$/.test(LIFF_ID);
+let LIFF_OK=false;
+const lineAvail=()=>!!(NATIVE&&typeof NATIVE.lineConfig==='function')||WEBLINE;
+const lineReady=()=>WEBLINE?LIFF_OK:!!(LINE_CFG&&LINE_CFG.id&&LINE_CFG.secret);
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+async function liffInit(){
+  try{
+    await loadScript('https://static.line-scdn.net/liff/edge/2/sdk.js');
+    await liff.init({liffId:LIFF_ID});
+    LIFF_OK=true;
+    if(liff.isLoggedIn()){const p=await liff.getProfile();LINE_PROF={userId:p.userId,displayName:p.displayName||'',pictureUrl:p.pictureUrl||''};}
+  }catch(e){LIFF_OK=false;}
+}
+async function webLine(op){
+  try{
+    if(op==='login'){liff.login({redirectUri:location.origin+location.pathname});return {ok:false,err:'redirect'};}
+    if(op==='logout'){liff.logout();return {ok:true};}
+    if(op==='fresh'){
+      if(!liff.isLoggedIn())return {ok:false,err:'expired'};
+      const t=liff.getAccessToken();if(!t)return {ok:false,err:'expired'};
+      const p=await liff.getProfile();
+      return {ok:true,token:t,profile:{userId:p.userId,displayName:p.displayName||'',pictureUrl:p.pictureUrl||''}};
+    }
+    return {ok:false,err:'net'}; // verifying guests needs the Android app
+  }catch(e){return {ok:false,err:'net'};}
+}
+function lineLoadCfg(){
+  if(!lineAvail()||WEBLINE)return;
+  try{LINE_CFG=JSON.parse(NATIVE.lineConfig());}catch(e){LINE_CFG=null;}
+  try{const p=NATIVE.lineProfile();LINE_PROF=p?JSON.parse(p):null;}catch(e){LINE_PROF=null;}
+}
+const LINE_CB=new Map();let LINE_SEQ=0;
+function lineCall(op,arg){
+  if(WEBLINE)return webLine(op);
+  return new Promise(res=>{
+    if(!lineAvail())return res({ok:false,err:'bridge'});
+    const id=++LINE_SEQ;LINE_CB.set(id,res);
+    try{NATIVE.line(op,id,JSON.stringify(arg||{}));}catch(e){LINE_CB.delete(id);return res({ok:false,err:'bridge'});}
+    setTimeout(()=>{if(LINE_CB.has(id)){LINE_CB.delete(id);res({ok:false,err:op==='login'?'cancel':'net'});}},op==='login'?900000:30000);
+  });
+}
+window.__lineCb=(id,s)=>{const f=LINE_CB.get(id);if(!f)return;LINE_CB.delete(id);let r;try{r=JSON.parse(s);}catch(e){r={ok:false,err:'parse'};}f(r);};
+function safePic(u){u=String(u||'');return /^https:\/\/[^\s"'<>]+$/.test(u)?u:'';}
+const myPic=()=>LINE_PROF?safePic(LINE_PROF.pictureUrl):'';
+function avHTML(pl,cls){
+  const p=safePic(pl.pic);
+  return `<span class="av ${pl.avc||'av0'} ${cls||''}">${esc(pl.av||'')}${p?`<img src="${esc(p)}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}</span>`;
+}
+function setProfile(p){LINE_PROF=p&&typeof p==='object'?p:null;if(G)render();}
+function needLogin(){
+  if(WEBLINE)return LIFF_OK&&!LINE_PROF&&!LOGIN_SKIP;
+  return lineAvail()&&(lineReady()?!LINE_PROF&&!LOGIN_SKIP:!S.lineSkip);
+}
+function lineErrText(e){
+  return {noconfig:'LINE 登入還沒設定好。',net:'連不上 LINE，請檢查網路再試一次。',token:'LINE 登入沒有成功。可能是 Channel secret 或 Callback URL 填錯了。',profile:'拿不到 LINE 的名字和頭像，請再試一次。'}[e]||'LINE 登入沒有成功，請再試一次。';
+}
+function showLogin(msg){
+  const ready=lineReady();
+  openSheet(`<h2>四色牌</h2>
+    ${msg?`<div class="note">${esc(msg)}</div>`:''}
+    ${ready?`<p>請先用 LINE 登入。家人幫忙登入一次就好，以後打開 App 就不用再登入。</p>
+      <button class="big-btn line" type="button" data-go="lineLogin">用 LINE 登入</button>`
+    :`<p class="muted">LINE 登入還沒設定好。家人要先到 LINE Developers 申請一個 LINE Login Channel，再把號碼填進來。</p>
+      <button class="big-btn" type="button" data-go="lineSetup">設定 LINE 登入（家人用）</button>`}
+    ${!ready||LOGIN_FAILED?`<button class="big-btn alt" type="button" data-go="skipLogin">先不登入，跟電腦打</button>`:''}`);
+}
+async function doLineLogin(){
+  openSheet(`<h2>LINE 登入</h2><p>請在 LINE 的畫面登入…</p>`);
+  const r=await lineCall('login');
+  if(r.ok&&r.profile){
+    LOGIN_FAILED=false;LOGIN_SKIP=false;
+    const n=String(r.profile.displayName||'').replace(/[<>&"]/g,'').trim().slice(0,6);
+    if(n)S.name=n;savePrefs();
+    setProfile(r.profile);
+    showWelcome();
+  }else if(r.err==='redirect')return;
+  else if(r.err==='cancel')showLogin();
+  else{LOGIN_FAILED=true;showLogin(lineErrText(r.err));}
+}
+function openLineSetup(){
+  const c=LINE_CFG||{};
+  openSheet(`<h2>LINE 登入設定</h2>
+    ${c.baked?'<div class="note">這個 App 已經內建 LINE 設定，通常不用改。</div>':''}
+    <ol class="muted" style="margin:0;padding-left:1.3em">
+      <li>到 developers.line.biz 登入，建立 Provider，再建立「LINE Login」Channel（App types 勾 Web app）。</li>
+      <li>在「LINE Login」分頁的 Callback URL，填入下面這一行。</li>
+      <li>把「Basic settings」裡的 Channel ID 和 Channel secret 填進來。</li>
+      <li>Channel 要按「Publish」，家人才登得進來。</li>
+    </ol>
+    <label class="field" for="lcCb"><span>Callback URL</span><input id="lcCb" value="${esc(c.cb||'https://localhost/sisepai-line-callback')}" style="font-size:16px"></label>
+    <label class="field" for="lcId"><span>Channel ID</span><input id="lcId" inputmode="numeric" value="${esc(c.id||'')}"></label>
+    <label class="field" for="lcSec"><span>Channel secret</span><input id="lcSec" autocomplete="off" placeholder="${c.secret?'已經填過了，要換才填':''}" style="font-size:16px"></label>
+    <p class="muted">每支手機都要填一樣的號碼，家人才連得進同一個房間。改了之後要重新登入 LINE。</p>
+    <button class="big-btn" type="button" data-go="lineSave">儲存</button>
+    <button class="big-btn alt" type="button" data-go="lineBack">返回</button>`);
+}
+function saveLineSetup(){
+  const id=($('#lcId').value||'').trim(),sec=($('#lcSec').value||'').trim(),cb=($('#lcCb').value||'').trim();
+  if(!/^\d{6,}$/.test(id)){$('#lcId').focus();return;}
+  if(!/^https?:\/\//.test(cb)){$('#lcCb').focus();return;}
+  if(!sec&&!(LINE_CFG&&LINE_CFG.secret)){$('#lcSec').focus();return;}
+  NATIVE.lineSetConfig(JSON.stringify({id,secret:sec,cb}));
+  lineLoadCfg();LOGIN_FAILED=false;LOGIN_SKIP=false;
+  showLogin('設定好了，請用 LINE 登入。');
+}
+async function doLineLogout(){
+  openSheet(`<h2>登出中…</h2>`);
+  await lineCall('logout');
+  LINE_PROF=null;LOGIN_SKIP=false;
+  netReset();STARTED=false;ROUND=0;newGame(0);
+  showLogin();
+}
+
+/* ---------- voice chat (WebRTC audio over PeerJS, everyone connects to everyone) ---------- */
+const VC={on:false,busy:false,stream:null,calls:new Map(),aud:new Map(),roster:[],err:''};
+function talking(i){
+  if(!G||!NET.mode)return false;
+  const pl=G.players[i];if(!pl)return false;
+  if(pl.kind==='local')return VC.on;
+  if(G.guest)return !!pl.vc;
+  return pl.kind==='remote'&&!!pl.conn&&NET.vroster.has(pl.conn.peer);
+}
+function vcBtnHTML(){
+  return `<button class="big-btn alt vcb${VC.on?' on':''}" type="button" data-go="vcToggle" ${VC.busy?'disabled':''}>${VC.on?ICON.mic+'語音聊天中（按一下關掉）':ICON.micOff+'打開語音聊天'}</button>${VC.err?`<div class="note">${esc(VC.err)}</div>`:''}`;
+}
+function renderVc(){
+  const b=$('#btnVc');if(!b)return;
+  b.hidden=!NET.mode;
+  b.classList.toggle('on',VC.on);b.disabled=VC.busy;
+  b.innerHTML=(VC.on?ICON.mic:ICON.micOff)+(VC.on?'語音中':'語音');
+  b.setAttribute('aria-label',VC.on?'語音聊天中，按一下關掉':'打開語音聊天');
+}
+function vcRefreshSheets(){
+  if(NET.lobby)openLobby();
+  else if(NET.mode==='guest'&&!STARTED&&$('#vcLobby'))guestWait();
+  try{if(G)render();else renderVc();}catch(e){renderVc();}
+}
+async function vcToggle(){
+  if(!NET.mode||VC.busy)return;
+  VC.err='';
+  if(VC.on){vcStop(true);vcRefreshSheets();return;}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){VC.err='這支手機不能用語音聊天。';vcRefreshSheets();if(STARTED&&G)announce(VC.err);return;}
+  VC.busy=true;vcRefreshSheets();
+  let st=null;
+  try{st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});}
+  catch(e){VC.busy=false;VC.err='沒有麥克風權限，沒辦法講話。請按「允許」再試一次。';vcRefreshSheets();if(STARTED&&G)announce(VC.err);return;}
+  VC.busy=false;
+  if(!NET.mode){st.getTracks().forEach(t=>t.stop());return;}
+  VC.stream=st;VC.on=true;
+  try{if(NATIVE&&NATIVE.voiceMode)NATIVE.voiceMode(true);}catch(e){}
+  vcAnnounce(true);vcRefreshSheets();
+}
+function vcAnnounce(on){
+  if(NET.mode==='host'){if(NET.peer)hostVoice(NET.peer.id,on);}
+  else if(NET.mode==='guest')netSend(NET.conn,{type:'voice',on});
+}
+function hostVoice(id,on){
+  if(on)NET.vroster.add(id);else NET.vroster.delete(id);
+  const ids=[...NET.vroster];
+  for(const g of NET.guests)if(g.open)netSend(g.conn,{type:'vroster',ids});
+  vcApply(ids);
+  if(NET.lobby)openLobby();else if(G)try{render();}catch(e){}
+}
+function vcApply(ids){
+  VC.roster=ids;
+  if(!VC.on||!VC.stream||!NET.peer){vcHangAll();return;}
+  const me=NET.peer.id;
+  for(const id of ids){
+    if(id===me||me>id||VC.calls.has(id))continue; // the smaller id places each call, so a pair is connected once
+    try{const c=NET.peer.call(id,VC.stream);if(c)vcWire(id,c);}catch(e){}
+  }
+  for(const [id,c] of [...VC.calls])if(!ids.includes(id)){VC.calls.delete(id);try{c.close();}catch(e){}vcDrop(id);}
+}
+function vcIncoming(c){
+  if(!VC.on||!VC.stream){try{c.close();}catch(e){}return;}
+  try{c.answer(VC.stream);vcWire(c.peer,c);}catch(e){}
+}
+function vcWire(id,c){
+  const old=VC.calls.get(id);
+  VC.calls.set(id,c);
+  if(old&&old!==c)try{old.close();}catch(e){}
+  c.on('stream',st=>vcPlay(id,st));
+  const end=()=>{if(VC.calls.get(id)===c){VC.calls.delete(id);vcDrop(id);}};
+  c.on('close',end);c.on('error',end);
+}
+function vcPlay(id,st){
+  let a=VC.aud.get(id);
+  if(!a){a=document.createElement('audio');a.autoplay=true;a.setAttribute('playsinline','');document.body.appendChild(a);VC.aud.set(id,a);}
+  a.srcObject=st;const p=a.play();if(p&&p.catch)p.catch(()=>{});
+}
+function vcDrop(id){const a=VC.aud.get(id);if(a){try{a.srcObject=null;}catch(e){}a.remove();VC.aud.delete(id);}}
+function vcHangAll(){for(const [id,c] of [...VC.calls]){VC.calls.delete(id);try{c.close();}catch(e){}vcDrop(id);}}
+function vcStop(tell){
+  const was=VC.on;
+  VC.on=false;vcHangAll();
+  for(const id of [...VC.aud.keys()])vcDrop(id);
+  if(VC.stream)VC.stream.getTracks().forEach(t=>{try{t.stop();}catch(e){}});
+  VC.stream=null;
+  if(was){try{if(NATIVE&&NATIVE.voiceMode)NATIVE.voiceMode(false);}catch(e){}}
+  if(tell&&was&&NET.mode)vcAnnounce(false);
+}
+$('#btnVc').addEventListener('click',vcToggle);
+
+/* ---------- sheets ---------- */
+function openSheet(html){$('#sheet').innerHTML=html;$('#modal').hidden=false;$('#sheet').scrollTop=0;}
+function closeSheet(){$('#modal').hidden=true;$('#sheet').innerHTML='';}
+const getRule=k=>k.startsWith('pts.')?SAVED.pts[k.slice(4)]:SAVED[k];
+function setRule(k,v){if(k.startsWith('pts.'))SAVED.pts[k.slice(4)]=v;else SAVED[k]=v;}
+function parseV(raw){return raw==='true'?true:raw==='false'?false:isNaN(+raw)?raw:+raw;}
+function rulesChanged(){
+  saveRules();
+  if(!STARTED&&NET.mode!=='guest'){ROUND=0;newGame(0);}
+  const n=$('#ruleNote');if(n)n.hidden=false;
+  const b=$('#redealBtn');if(b)b.hidden=!(STARTED&&G&&!G.over&&!G.guest);
+}
+$('#sheet').addEventListener('click',e=>{
+  const chi=e.target.closest('[data-chi]');
+  if(chi&&G.waiting&&G.waiting.kind==='claim'){const o=G.waiting.chiOpts[+chi.dataset.chi];closeSheet();G.waiting.resolve({type:'chi',opt:o});return;}
+  const rj=e.target.closest('[data-rec]');
+  if(rj){openRecorder(+rj.dataset.rec);return;}
+  const sb=e.target.closest('[data-set]');
+  if(sb){
+    S[sb.dataset.set]=parseV(sb.dataset.v);
+    savePrefs();document.documentElement.classList.toggle('big',!!S.big);
+    sb.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===sb));
+    render();return;
+  }
+  const rb=e.target.closest('[data-rule]');
+  if(rb){
+    setRule(rb.dataset.rule,parseV(rb.dataset.v));
+    rb.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===rb));
+    if(rb.dataset.rule==='players')clampHand();
+    rulesChanged();return;
+  }
+  const st=e.target.closest('[data-step]');
+  if(st){
+    const k=st.dataset.step,min=+st.dataset.min,max=+st.dataset.max;
+    const v=Math.min(max,Math.max(min,(+getRule(k)||0)+(+st.dataset.d)));
+    setRule(k,v);if(k==='hand')clampHand();
+    const out=st.parentElement.querySelector('.v');if(out)out.textContent=getRule(k);
+    rulesChanged();return;
+  }
+  const go=e.target.closest('[data-go]');if(!go)return;
+  const k=go.dataset.go;
+  if(k==='close'){closeSheet();if(NET.lobby)openLobby();else if(!STARTED&&NET.mode!=='guest')showWelcome();else if(G&&G.over&&G.result&&!G.guest)openSheet(resultHTML(0));}
+  else if(k==='rules'){openRules();}
+  else if(k==='settings'){openSettings();}
+  else if(k==='ruleEdit'){openRuleEditor();}
+  else if(k==='ruleReset'){SAVED=clone(DEFAULT_RULES);rulesChanged();openRuleEditor(true);}
+  else if(k==='redeal'){startNew(G.dealer);}
+  else if(k==='recorder'){openRecorder(firstUnrecorded());}
+  else if(k==='recPrev'){openRecorder((REC_I+VOICE.length-1)%VOICE.length);}
+  else if(k==='recNext'){openRecorder((REC_I+1)%VOICE.length);}
+  else if(k==='recPlay'){say(VOICE[REC_I].k,true);}
+  else if(k==='testVoice'){say(['start','c10'],true);coinSound();}
+  else if(k==='start'){STARTED=true;closeSheet();keepAwake();say('start',true);runGame();}
+  else if(k==='again'){startNew(NEXT_DEALER);}
+  else if(k==='netHost'){hostRoom();}
+  else if(k==='netJoinOpen'){openJoin();}
+  else if(k==='netJoin'){joinRoom();}
+  else if(k==='netStart'){hostStart();}
+  else if(k==='netLeave'){netLeave();}
+  else if(k==='vcToggle'){vcToggle();}
+  else if(k==='lineLogin'){doLineLogin();}
+  else if(k==='lineSetup'){openLineSetup();}
+  else if(k==='lineSave'){saveLineSetup();}
+  else if(k==='lineBack'){if(STARTED||NET.mode||!needLogin())openSettings();else showLogin();}
+  else if(k==='lineLogout'){doLineLogout();}
+  else if(k==='skipLogin'){if(lineReady())LOGIN_SKIP=true;else{S.lineSkip=true;savePrefs();}showWelcome();}
+  else if(k==='resetStats'){STATS={games:0,wins:[0,0,0,0],pts:[0,0,0,0],draws:0};store.set('ssp-stats',STATS);openSettings();}
+  else if(k==='resetChips'){CHIPS=[0,1,2,3].map(()=>SAVED.startChips);saveChips();if(G&&!G.guest&&NET.mode!=='host')render();openSettings();}
+});
+function clampHand(){
+  const max=Math.floor((112-12-(SAVED.dealerExtra?1:0))/SAVED.players);
+  if(SAVED.hand>max)SAVED.hand=max;
+  const out=document.querySelector('[data-step="hand"]')?.parentElement.querySelector('.v');if(out)out.textContent=SAVED.hand;
+}
+$('#sheet').addEventListener('input',e=>{
+  if(e.target.id==='setName'){S.name=e.target.value.trim().slice(0,6)||'奶奶';savePrefs();render();}
+});
+function seg(key,label,opts){
+  return `<div class="field"><span>${label}</span><div class="seg">${opts.map(([v,l])=>`<button type="button" data-set="${key}" data-v="${v}" class="${S[key]===v?'on':''}">${l}</button>`).join('')}</div></div>`;
+}
+function ruleSeg(key,label,opts,sub){
+  return `<div class="field"><span>${label}${sub?`<span class="sub">${sub}</span>`:''}</span><div class="seg">${opts.map(([v,l])=>`<button type="button" data-rule="${key}" data-v="${v}" class="${getRule(key)===v?'on':''}">${l}</button>`).join('')}</div></div>`;
+}
+function stepper(key,label,min,max,sub,step){
+  step=step||1;
+  return `<div class="stepper"><div class="sl">${label}${sub?`<span class="sub">${sub}</span>`:''}</div><div class="ctl"><button type="button" data-step="${key}" data-d="${-step}" data-min="${min}" data-max="${max}" aria-label="${label} 減少">−</button><span class="v">${getRule(key)}</span><button type="button" data-step="${key}" data-d="${step}" data-min="${min}" data-max="${max}" aria-label="${label} 增加">+</button></div></div>`;
+}
+function openSettings(){
+  refreshClips();
+  const done=VOICE.filter(v=>CLIPS.has(v.k)).length;
+  const lineSect=!lineAvail()?'':`<div class="field"><span>LINE 帳號</span>
+      ${LINE_PROF?`<div class="prof">${avHTML({avc:'av0',av:S.name[0]||'我',pic:myPic()},'lg')}<span>${esc(LINE_PROF.displayName||'')}</span></div>
+        <button class="big-btn alt" type="button" data-go="lineLogout">登出 LINE（換帳號）</button>`
+      :`<p class="muted">${lineReady()?'還沒登入 LINE。':'LINE 登入還沒設定。'}</p>${lineReady()?'<button class="big-btn line" type="button" data-go="lineLogin">用 LINE 登入</button>':''}`}
+      ${WEBLINE?'':'<button class="big-btn alt" type="button" data-go="lineSetup">LINE 登入設定</button>'}</div>`;
+  openSheet(`<h2>設定（給家人用）</h2>
+    ${lineSect}
+    <label class="field" for="setName"><span>玩家的稱呼${LINE_PROF?'<span class="sub">登入時會先用 LINE 名字，可以改</span>':''}</span><input id="setName" maxlength="6" value="${esc(S.name)}"></label>
+    <button class="big-btn" type="button" data-go="ruleEdit">自訂遊戲規則</button>
+    ${canNet()?`<div class="field"><span>這支手機的房間號碼</span><div class="code">${roomCode()}</div><span class="sub">家人要連進來時，輸入這個號碼。號碼不會變，可以先抄給家人。</span></div>`:''}
+    <div class="field"><span>台語聲音</span>
+      <p class="muted">${NATIVE?`已錄 ${done} / ${VOICE.length} 句。還沒錄的句子會先用國語唸。`:'錄音要在 Android App 裡才能用。網頁版會用國語唸。'}</p>
+      ${NATIVE?`<button class="big-btn" type="button" data-go="recorder">錄台語聲音</button>`:''}
+      <button class="big-btn alt" type="button" data-go="testVoice">試聽聲音</button>
+    </div>
+    ${seg('sound','聲音',[[true,'開'],[false,'關']])}
+    ${seg('speed','電腦出牌速度',[[0,'慢'],[1,'普通'],[2,'快']])}
+    ${seg('level','電腦牌友',[['easy','輕鬆'],['normal','認真']])}
+    ${seg('big','牌的大小',[[false,'大'],[true,'特大']])}
+    ${statHTML()}
+    <button class="big-btn alt" type="button" data-go="resetChips">錢筒重新開始（每人 ${fmt(SAVED.startChips)} 元）</button>
+    <button class="big-btn alt" type="button" data-go="resetStats">戰績歸零</button>
+    ${STARTED||NET.mode?`<button class="big-btn alt" type="button" data-go="netLeave">${NET.mode?'結束連線，回主畫面':'不打這局了，回主畫面'}</button>`:''}
+    <button class="big-btn" type="button" data-go="close">好了</button>`);
+}
+function openRuleEditor(justReset){
+  const maxHand=Math.floor((112-12-(SAVED.dealerExtra?1:0))/SAVED.players);
+  openSheet(`<h2>自訂遊戲規則</h2>
+    <p class="muted">照奶奶平常的打法改。改了會自動儲存，<b>下一局開始</b>照新規則打。連線時用的是房主手機上的規則。</p>
+    <div class="note" id="ruleNote" ${justReset?'':'hidden'}>${justReset?'已經改回預設規則。':'已儲存，下一局開始用新規則。'}</div>
+    <button class="big-btn alt" type="button" data-go="redeal" id="redealBtn" ${justReset&&STARTED&&G&&!G.over&&!G.guest?'':'hidden'}>不打這局了，現在用新規則重新發牌</button>
+    <h3>人數和發牌</h3>
+    ${ruleSeg('players','幾個人打',[[4,'4 個人'],[3,'3 個人']],'3 個人打時，只有下家和上家')}
+    ${stepper('hand','每人發幾張',8,maxHand)}
+    ${ruleSeg('dealerExtra','莊家多拿一張',[[true,'要，莊家先打'],[false,'不用，莊家先摸']])}
+    <h3>摸牌</h3>
+    ${ruleSeg('openDraw','摸到的牌',[[false,'直接收進手裡'],[true,'先翻開給大家看']],'翻開的話：自己要就收起來再打一張；不要的話，別人可以吃、碰、胡')}
+    <h3>吃和碰</h3>
+    ${ruleSeg('chi','吃牌',[['next','只能吃上家'],['any','誰的都能吃'],['none','不能吃']],'「誰的都能吃」時，離打牌的人越近越優先')}
+    ${ruleSeg('peng','碰牌',[[true,'可以碰'],[false,'不能碰']])}
+    <h3>牌組</h3>
+    ${ruleSeg('singleJiang','將（帥）單張算一組',[[true,'算'],[false,'不算']])}
+    ${ruleSeg('pairs','對子（兩張一樣）算一組',[[false,'不算'],[true,'算']])}
+    ${ruleSeg('mixTrio','將士象、車馬包',[[false,'一定要同色'],[true,'可以不同色']])}
+    ${ruleSeg('mixZu','三張或四張卒',[[false,'顏色都要不同'],[true,'顏色可以重複']],'重複的例子：紅卒、紅卒、綠卒')}
+    <h3>每種牌組算幾台</h3>
+    ${stepper('pts.單將','單張將',0,20)}
+    ${stepper('pts.將士象','將士象',0,20)}
+    ${stepper('pts.車馬包','車馬包',0,20)}
+    ${stepper('pts.三卒','三張卒',0,20)}
+    ${stepper('pts.四卒','四張卒',0,20)}
+    ${stepper('pts.坎','坎',0,20,'手上自己湊到三張一樣')}
+    ${stepper('pts.四張','四張一樣',0,30)}
+    ${stepper('pts.碰','碰出來的三張',0,20)}
+    ${stepper('pts.對子','對子',0,20,'要先把「對子算一組」打開')}
+    <h3>胡牌</h3>
+    ${stepper('minPts','胡牌最少要幾台',0,40,'0 就是不限')}
+    ${stepper('zimo','自摸多加幾台',0,10)}
+    ${stepper('dealerBonus','莊家胡牌多加幾台',0,10)}
+    <h3>籌碼（假的錢，只用來算輸贏）</h3>
+    ${stepper('base','底：每次胡牌先付幾元',0,1000,'',10)}
+    ${stepper('perTai','每一台多付幾元',0,1000,'',10)}
+    ${ruleSeg('payMode','誰付錢',[['shooter','放槍的人付，自摸三家付'],['all','每次都是其他人一起付']])}
+    ${stepper('startChips','每人一開始有幾元',100,10000,'錢用完了，下一局會自動補回這麼多',100)}
+    <p class="muted">例子：胡 3 台 = ${SAVED.base} + ${SAVED.perTai} × 3 = ${fmt(SAVED.base+SAVED.perTai*3)} 元（下次打開這頁會更新）</p>
+    <button class="big-btn alt" type="button" data-go="ruleReset">全部改回預設</button>
+    <button class="big-btn" type="button" data-go="settings">好了</button>`);
+}
+
+/* ---------- Taiwanese recorder (family uses this once) ---------- */
+let REC_I=0, RECORDING=false;
+function firstUnrecorded(){refreshClips();const i=VOICE.findIndex(v=>!CLIPS.has(v.k));return i<0?0:i;}
+function openRecorder(i){
+  REC_I=i;refreshClips();
+  const v=VOICE[i],has=CLIPS.has(v.k),done=VOICE.filter(x=>CLIPS.has(x.k)).length;
+  openSheet(`<h2>錄台語聲音</h2>
+    <p class="muted">按住紅色按鈕，用台語唸出下面的字，唸完再放開。錄好會自動播一次。照奶奶平常的講法唸就好，例如「綠」可以唸「青」。唸不好就再按住重錄。</p>
+    <div class="recbox">
+      <div class="rec-n" id="recNote">第 ${i+1} / ${VOICE.length} 句${has?' · 已錄好 ✓':''}</div>
+      ${v.t!=null?cardHTML(v.t,'md'):''}
+      <div class="rec-tw">${v.tw}</div>
+      ${v.t==null?`<div class="muted">（國語意思：${v.zh}）</div>`:''}
+      <button class="rec-btn" id="recBtn" type="button">按住錄音</button>
+      <div class="rec-row">
+        <button class="big-btn alt" type="button" data-go="recPrev">上一句</button>
+        <button class="big-btn alt" type="button" data-go="recPlay" ${has?'':'disabled'}>播放</button>
+        <button class="big-btn" type="button" data-go="recNext">下一句</button>
+      </div>
+    </div>
+    <div class="slabel">已錄 ${done} / ${VOICE.length} 句（點一句可以跳過去）</div>
+    <div class="rec-list">${VOICE.map((x,j)=>`<button class="rli${j===i?' cur':''}${CLIPS.has(x.k)?' ok':''}" type="button" data-rec="${j}">${CLIPS.has(x.k)?'✓ ':''}${x.tw}</button>`).join('')}</div>
+    <button class="big-btn" type="button" data-go="settings">錄好了</button>`);
+  const b=$('#recBtn');
+  const down=e=>{e.preventDefault();if(RECORDING)return;RECORDING=true;b.classList.add('on');b.textContent='錄音中…';try{b.setPointerCapture(e.pointerId);}catch(_){} NATIVE.startRec(v.k);};
+  const up=()=>{if(!RECORDING)return;RECORDING=false;b.classList.remove('on');b.textContent='處理中…';NATIVE.stopRec();};
+  b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);
+  b.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function recNote(t){const n=$('#recNote');if(n)n.textContent=t;const b=$('#recBtn');if(b&&!RECORDING){b.classList.remove('on');b.textContent='按住錄音';}}
+window.__rec=(type,status)=>{
+  if(type==='start'&&status!=='ok'){RECORDING=false;recNote(status==='perm'?'請先按「允許」使用麥克風，再按住錄音':'沒辦法錄音，請再試一次');}
+  else if(type==='perm'){recNote(status==='ok'?'可以錄音了，請按住紅色按鈕':'沒有麥克風權限，沒辦法錄音');}
+  else if(type==='stop'){
+    if(status==='ok'){refreshClips();const k=VOICE[REC_I].k;openRecorder(REC_I);recNote('錄好了 ✓ 按「下一句」繼續');say(k,true);}
+    else if(status==='short'){recNote('太短了，請按住久一點再唸');}
+    else recNote('按住錄音');
+  }
+};
+
+function openRules(){
+  const A=G&&STARTED?R:SAVED;
+  const kinds=['單將','將士象','車馬包','三卒','四卒','坎','四張','碰','對子'].filter(k=>!(k==='單將'&&!A.singleJiang)&&!(k==='對子'&&!A.pairs)&&!(k==='碰'&&!A.peng));
+  const note={'將士象':A.mixTrio?'（可不同色）':'（同色）','車馬包':A.mixTrio?'（可不同色）':'（同色）','三卒':A.mixZu?'':'（不同色）','四卒':A.mixZu?'':'（不同色）','坎':'（手上三張一樣）'};
+  const pt=kinds.map(k=>`<tr><td>${KL[k]}${note[k]||''}</td><td>${A.pts[k]||0} 台</td></tr>`).join('');
+  const chiTxt={next:'只能吃上家打的牌。',any:'誰打的牌都能吃，離打牌的人越近越優先。',none:'這個打法不能吃。'}[A.chi];
+  const diff=G&&STARTED&&!G.guest&&JSON.stringify(SAVED)!==JSON.stringify(R);
+  openSheet(`<h2>怎麼玩</h2>
+    ${diff?'<div class="note">你改過規則，下一局才會照新規則打。下面是這一局的規則。</div>':''}
+    <ul>
+      <li>黃、紅、綠、白四種顏色，每色有 將 士 象 車 馬 包 卒，每種 4 張，共 112 張。</li>
+      <li>${A.players} 個人打，每人 ${A.hand} 張${A.dealerExtra?`，莊家 ${A.hand+1} 張，莊家先打`:'，莊家先摸'}。</li>
+      <li>${A.openDraw?'摸到的牌先翻開給大家看。要就按「收起來」，再打一張出去；不要的話，別人可以吃、碰、胡。':'輪到你會自動摸一張。<b>點一張牌，再點一次</b>就打出去。'}</li>
+      <li>紅色按鈕是<b>胡</b>，橘色是<b>碰</b>或<b>收起來</b>，藍色是<b>吃</b>，灰色叉叉是<b>不要</b>。按鈕上會畫出要用的牌。</li>
+      <li>${A.peng?'碰：手上有兩張一樣的，誰打出來都能碰。':'這個打法不能碰。'}${chiTxt}</li>
+      <li>手上全部的牌都能湊成牌組，${A.minPts?`而且有 ${A.minPts} 台以上，`:''}就可以胡。牌堆摸完沒人胡，就是流局。</li>
+      ${A.zimo||A.dealerBonus?`<li>${A.zimo?`自摸多加 ${A.zimo} 台。`:''}${A.dealerBonus?`莊家胡牌多加 ${A.dealerBonus} 台。`:''}</li>`:''}
+      <li>胡牌拿錢：底 ${A.base} 元，每台再加 ${A.perTai} 元。${A.payMode==='all'?'每次都是其他人一起付。':'放槍的人付；自摸的話三家都付。'}</li>
+    </ul>
+    <h3>牌組和台數</h3>
+    <table class="ptable">${pt}</table>
+    <p class="muted">規則可以到「設定 → 自訂遊戲規則」裡改。</p>
+    ${STARTED||NET.mode?'<button class="big-btn" type="button" data-go="close">知道了</button>':`<button class="big-btn go" type="button" data-go="start" aria-label="開始打牌">${ICON.play}</button>`}`);
+}
+$('#btnRules').addEventListener('click',openRules);
+$('#btnSet').addEventListener('click',openSettings);
+
+function showWelcome(){
+  if(needLogin())return showLogin();
+  const pic=myPic();
+  openSheet(`${pic?`<div class="prof">${avHTML({avc:'av0',av:S.name[0]||'我',pic},'lg')}<span>${esc(S.name)}，來打四色牌！</span></div>`:`<h2>${esc(S.name)}，來打四色牌！</h2>`}
+  <p class="muted">點一張牌、再點一次就打出去。</p>
+  <div class="cashbox">錢筒 ${moneyHTML(CHIPS[0])} <span>${fmt(CHIPS[0])} 元</span></div>
+  <button class="big-btn go" type="button" data-go="start" aria-label="跟電腦打">${ICON.play}<span style="font-size:22px">跟電腦打</span></button>
+  ${canHost()?`<button class="big-btn net" type="button" data-go="netHost">${ICON.people}開房間，等家人連進來</button>`:''}
+  <button class="big-btn alt" type="button" data-go="netJoinOpen">加入家人的房間</button>
+  <button class="big-btn alt" type="button" data-go="rules">規則</button>`);
+}
+loadPrefs();
+refreshClips();
+lineLoadCfg();
+newGame(0);
+if(WEBLINE){
+  openSheet(`<h2>四色牌</h2><p>載入中…</p>`);
+  liffInit().then(()=>{
+    if(LINE_PROF){const n=String(LINE_PROF.displayName||'').replace(/[<>&"]/g,'').trim().slice(0,6);if(n&&(S.name==='奶奶'||!S.lineNamed)){S.name=n;S.lineNamed=true;savePrefs();}render();}
+    showWelcome();
+  });
+}else showWelcome();
+if(!WEBLINE&&lineReady()&&LINE_PROF)lineCall('fresh').then(r=>{
+  if(r.ok&&r.profile)setProfile(r.profile);
+  else if(r.err==='expired'){LINE_PROF=null;if(!STARTED&&!NET.mode)showLogin('LINE 登入過期了，請再登入一次。');}
+});
+</script>
+
+</body></html>
