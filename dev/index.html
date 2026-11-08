@@ -61,12 +61,19 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .tbtn{font:700 17px var(--font-ui); padding:8px 14px; border-radius:10px; border:2px solid var(--line); background:var(--panel); color:var(--ink)}
 
 /* the table, seen from grandma's chair: a trapezoid of felt, friends seated top / left / right, each one's discards in front of them */
-.table{display:grid; grid-template-columns:minmax(72px,auto) minmax(0,1fr) minmax(72px,auto); grid-template-rows:auto minmax(0,1fr); gap:6px 6px; align-items:center}
+.table{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:auto auto; gap:4px; align-items:center}
+.s-top{grid-column:2; grid-row:1} .s-left{grid-column:1; grid-row:1} .s-right{grid-column:3; grid-row:1}
+.felt{grid-column:1 / -1; grid-row:2}
+@media (min-width:700px), (orientation:landscape){
+  .table{grid-template-columns:minmax(80px,auto) minmax(0,1fr) minmax(80px,auto); grid-template-rows:auto minmax(0,1fr); gap:4px 6px}
+  .s-left{grid-column:1; grid-row:2} .s-right{grid-column:3; grid-row:2}
+  .felt{grid-column:2; grid-row:2}
+  .s-top{flex-direction:row; gap:8px}
+  .s-top .sinfo{text-align:left}
+}
 .seat{display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 4px; border-radius:14px; border:3px solid transparent; min-width:0; text-align:center}
 .seat.empty{visibility:hidden}
-.s-top{grid-column:2; grid-row:1; flex-direction:row; justify-content:center; gap:8px; padding:4px 8px}
-.s-top .sinfo{text-align:left}
-.s-left{grid-column:1; grid-row:2} .s-right{grid-column:3; grid-row:2}
+.s-top{justify-content:center; padding:4px 6px}
 .seat.on{border-color:var(--on); background:var(--panel); animation:glow 1.2s ease-in-out infinite alternate}
 @keyframes glow{from{box-shadow:0 0 0 0 transparent} to{box-shadow:0 0 0 4px var(--on)}}
 .sp{position:relative}
@@ -74,7 +81,7 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .av.seat-av{width:48px; height:48px; font-size:24px; box-shadow:0 2px 6px var(--shadow); border:2px solid var(--panel)}
 .seat .mini{justify-content:center; max-width:110px}
 .zh{background:var(--hu); color:#fff}
-.felt{grid-column:2; grid-row:2; position:relative; display:flex; flex-direction:column; justify-content:space-between; gap:6px; min-height:230px; padding:12px 14px; isolation:isolate}
+.felt{position:relative; display:flex; flex-direction:column; justify-content:space-between; gap:6px; min-height:230px; padding:12px 14px; isolation:isolate}
 .felt::before{content:""; position:absolute; inset:0; z-index:-1; clip-path:polygon(9% 0, 91% 0, 100% 100%, 0 100%); background:radial-gradient(120% 90% at 50% 55%, var(--felt-hi), var(--felt-lo)); }
 .felt::after{content:""; position:absolute; inset:-5px -5px -7px; z-index:-2; clip-path:polygon(9% 0, 91% 0, 100% 100%, 0 100%); background:linear-gradient(var(--rim-hi), var(--rim-lo))}
 .felt-mid{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:6px; flex:1}
@@ -250,22 +257,30 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .rli.ok{border-color:var(--on); color:var(--on)}
 .rli.cur{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
 
-/* phone turned sideways: table fills the screen, buttons in a column on the right */
+/* phone turned sideways: everything on one screen, buttons in a column on the right */
 @media (orientation: landscape) and (max-height: 600px){
-  #app{max-width:none; margin:0; margin-right:150px; padding-block:4px 6px; gap:4px}
-  .top{gap:6px} .brand{font-size:20px} .meta{font-size:14px} .tbtn{padding:5px 10px; font-size:15px}
-  .table{grid-template-rows:auto minmax(0,1fr)}
-  .felt{min-height:170px; padding:8px 12px}
-  .s-top{padding:2px 6px} .av.seat-av{width:40px; height:40px; font-size:20px}
-  .card.md{--w:42px} .card.rv{--w:19px}
-  :root{--hand-w:34px} :root.big{--hand-w:40px}
-  .hand{flex-wrap:nowrap; padding:8px 4px 4px; gap:4px}
-  .mehead{flex-wrap:nowrap}
+  html,body{height:100%; overflow:hidden}
+  #app{max-width:none; margin:0; margin-right:150px; height:100dvh; padding-block:2px 4px; gap:2px; display:grid; grid-template-rows:auto minmax(0,1fr) auto}
+  .top{gap:6px} .brand{font-size:18px} .meta{font-size:13px} .tbtn{padding:3px 9px; font-size:14px; border-radius:8px}
+  .table{min-height:0; height:100%}
+  .felt{min-height:0; height:100%; overflow:hidden; padding:5px 12px; gap:2px}
+  .seat{padding:2px; gap:1px} .s-top{padding:0 6px}
+  .av.seat-av{width:34px; height:34px; font-size:17px}
+  .oname{font-size:15px} .osub{font-size:12px}
+  .card.md{--w:32px} .card.rv{--w:15px}
+  .who{font-size:14px}
+  .back{width:20px; height:54px}
+  :root{--hand-w:28px} :root.big{--hand-w:32px}
+  .mine{flex-direction:row; align-items:flex-start; gap:6px}
+  .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:96px; flex:none; gap:3px}
+  .mehead .melds{justify-content:flex-start; flex:none} .mehead .cashbox{font-size:14px; padding:2px 6px}
+  .slabel{font-size:14px}
+  .hand{flex:1; flex-wrap:nowrap; justify-content:flex-start; padding:6px 4px 2px; gap:3px; overflow-x:auto}
   .bar{position:fixed; top:0; right:0; bottom:0; width:150px; border-top:none; border-left:1px solid var(--line); box-shadow:-4px 0 14px var(--shadow)}
-  .bar-in{height:100%; padding:8px; padding-right:max(8px, env(safe-area-inset-right,0px))}
+  .bar-in{height:100%; padding:6px 8px; padding-right:max(8px, env(safe-area-inset-right,0px))}
   #msg{font-size:15px}
   #actions{flex-direction:column; flex:1}
-  .act{min-height:0; flex:1} .act.ghost{flex:0 0 64px}
+  .act{min-height:0; flex:1} .act.ghost{flex:0 0 58px}
   .wait{min-height:0}
 }@media (prefers-reduced-motion: reduce){ .card{transition:none} .card.hl,.act.hu,.seat.on,.rec-btn.on,.dots span{animation:none} }
 </style>
@@ -609,6 +624,7 @@ async function keepAwake(){try{if(navigator.wakeLock)WL=await navigator.wakeLock
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&G&&!G.over)keepAwake();});
 
 /* ---------- game state helpers ---------- */
+const isLand=()=>innerWidth>innerHeight;
 const aiSec=()=>{const v=Math.round(+S.aiSec);return v>=3&&v<=10?v:3;};
 const delay=()=>aiSec()*1000;
 function sleep(ms){const gid=G.id;return new Promise((res,rej)=>setTimeout(()=>{if(!G||G.id!==gid)rej(ABORT);else res();},ms));}
@@ -930,7 +946,7 @@ function render(){
   const pos=N===4?{1:'R',2:'T',3:'L'}:{1:'R',2:'L'};
   const pend=G.last&&!G.over?G.last:null; // the card everybody is looking at right now
   const river=i=>{
-    const d=G.players[i].discards;
+    const all=G.players[i].discards,cut=Math.max(0,all.length-(isLand()&&innerHeight<600?12:20)),d=all.slice(cut);
     return d.map((t,k)=>cardHTML(t,'rv'+(pend&&pend.p===i&&k===d.length-1?' just':''))).join('');
   };
   for(const s of ['T','L','R']){const el=$('#seat'+s);el.innerHTML='';el.className='seat s-'+({T:'top',L:'left',R:'right'})[s]+' empty';}
@@ -968,7 +984,8 @@ function render(){
   const stacks=[];
   for(let f=0;f<=8;f++){
     const cs=me.hand.filter(x=>fam(x.t)===f);
-    for(let k=0;k<cs.length;k+=4)stacks.push(cs.slice(k,k+4));
+    const per=isLand()&&innerHeight<600?3:4;
+    for(let k=0;k<cs.length;k+=per)stacks.push(cs.slice(k,k+per));
   }
   $('#hand').innerHTML=stacks.map(cs=>`<div class="stack">${cs.map(x=>{
     const ch=RANKS[tR(x.t)],sel=G.sel===x.id?' sel':'';
@@ -1694,7 +1711,6 @@ function openRules(){
     ${STARTED||NET.mode?'<button class="big-btn" type="button" data-go="close">知道了</button>':`<button class="big-btn go" type="button" data-go="start" aria-label="開始打牌">${ICON.play}</button>`}`);
 }
 /* 轉向: flip between sideways (full screen) and upright */
-const isLand=()=>innerWidth>innerHeight;
 async function rotateScreen(){
   const want=isLand()?'port':'land';
   S.orient=want;savePrefs();
