@@ -509,18 +509,37 @@ function say(keys,interrupt){
   if(!Array.isArray(keys))keys=[keys];
   const items=keys.map(k=>[k,VMAP[k]?VMAP[k].zh:'']);
   if(NATIVE){try{NATIVE.say(JSON.stringify(items),!!interrupt);}catch(e){}return;}
-  if(interrupt){WQ.length=0;if(WA){try{WA.pause();}catch(e){}WA=null;}try{speechSynthesis.cancel();}catch(e){}}
+  if(interrupt){WQ.length=0;if(WA){try{WA.onended=null;WA.stop();}catch(e){}WA=null;}try{speechSynthesis.cancel();}catch(e){}}
   for(const it of items)if(it[0]&&VMAP[it[0]])WQ.push(it);
   if(!WA)wNext();
 }
-/* web: built-in Taiwanese clips (tw/<key>.mp3), Mandarin speech only if a clip can't play */
-const WQ=[];let WA=null;
+/* web: built-in Taiwanese clips (tw/<key>.mp3) through Web Audio, unlocked on the first tap (iPhone blocks sound before that) */
+const WQ=[],WBUF={};let WA=null,WAC=null;
+function wCtx(){
+  if(!WAC){const A=window.AudioContext||window.webkitAudioContext;if(!A)return null;WAC=new A();}
+  if(WAC.state==='suspended')WAC.resume().catch(()=>{});
+  return WAC;
+}
+function wLoad(k){
+  if(!WBUF[k])WBUF[k]=fetch('tw/'+k+'.mp3').then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();})
+    .then(b=>new Promise((res,rej)=>wCtx().decodeAudioData(b,res,rej))).catch(e=>{delete WBUF[k];throw e;});
+  return WBUF[k];
+}
+function wUnlock(){
+  const c=wCtx();if(!c)return;
+  try{const s=c.createBufferSource();s.buffer=c.createBuffer(1,1,22050);s.connect(c.destination);s.start(0);}catch(e){}
+  if(!wUnlock.pre){wUnlock.pre=true;VOICE.forEach(v=>wLoad(v.k).catch(()=>{}));}
+}
+if(!NATIVE)['touchend','pointerup','click','keydown'].forEach(ev=>document.addEventListener(ev,wUnlock,{capture:true,passive:true}));
 function wNext(){
   const it=WQ.shift();if(!it){WA=null;return;}
-  const a=new Audio('tw/'+it[0]+'.mp3');WA=a;
-  let done=false;const fin=ok=>{if(done)return;done=true;if(!ok)wSpeak(it[1]);if(WA===a)wNext();};
-  a.onended=()=>fin(true);a.onerror=()=>fin(false);
-  a.play().catch(()=>fin(false));
+  const c=wCtx();if(!c){wSpeak(it[1]);return wNext();}
+  const mark={stop(){}};WA=mark;
+  wLoad(it[0]).then(buf=>{
+    if(WA!==mark)return;
+    const s=c.createBufferSource();s.buffer=buf;s.connect(c.destination);
+    s.onended=()=>{if(WA===s)wNext();};WA=s;s.start(0);
+  }).catch(()=>{if(WA!==mark)return;wSpeak(it[1]);wNext();});
 }
 function wSpeak(zh){
   if(!zh||!('speechSynthesis' in window))return;
