@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Noto+Serif+TC:wght@700;900&family=LXGW+WenKai+TC:wght@700&display=swap">
 <style>
 /* Layout: one phone-held card table. Opponents across the top, the latest discard in the middle, grandma's hand in one row per color, and a sticky bar of big picture buttons (the buttons show real cards, because the player reads only card characters). Money is drawn as NT$10 / NT$50 coins and NT$100 bills. */
 :root{
@@ -21,6 +21,7 @@
   --c50-hi:#fbe9a6; --c50-lo:#c8982c; --c50-edge:#a27a1b; --c50-ink:#553b00;
   --bill-a:#e7685b; --bill-b:#b8372d; --bill-edge:#93281f; --bill-ink:#fff6ee;
   --font-card:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
+  --font-brush:"LXGW WenKai TC","BiauKai","DFKai-SB","標楷體","Kaiti TC","STKaiti",var(--font-card);
   --font-ui:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --hand-w:40px; --ui:20px;
   --felt-hi:#2f7a52; --felt-lo:#17452e; --rim-hi:#8a5a33; --rim-lo:#4b2c16;
@@ -80,7 +81,7 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .av.seat-av{width:38px; height:38px; font-size:19px}
   #actions .act{min-height:72px}
   main#app{padding-left:max(8px, env(safe-area-inset-left,0px)); padding-right:max(8px, env(safe-area-inset-right,0px))}
-  .mine .hand{gap:3px; padding:10px 4px 6px}
+  .mine .hand{column-gap:8px; padding:16px 4px 6px}
   .felt{min-height:0; padding:10px 12px}
   #app{gap:6px}
 }
@@ -143,13 +144,13 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .slabel{font-size:16px; color:var(--muted); font-weight:700}
 .melds{display:flex; flex-wrap:wrap; gap:6px; flex:1; justify-content:center}
 .meld{display:flex; align-items:flex-end; gap:1px; padding:3px; background:var(--felt); border-radius:8px}
-.hand{display:flex; flex-wrap:nowrap; justify-content:center; align-items:flex-start; gap:6px 5px; padding:12px 6px 8px; border-radius:16px; border:3px solid transparent}
+.hand{display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-end; gap:16px 10px; padding:18px 6px 8px; border-radius:16px; border:3px solid transparent}
 .hand.on{border-color:var(--on); background:var(--panel)}
-.stack{display:flex; flex-direction:column; align-items:center}
+.fan{display:flex; align-items:flex-end}
 #hand{scroll-margin-bottom:150px}
-.stack .card+.card{margin-top:calc(var(--w) * -1.62)}
-.stack .card{box-shadow:0 -1px 3px var(--shadow)}
-.stack .card.sel{transform:translateY(-8px)}
+.fan .card+.card{margin-left:calc(var(--w) * -.06)}
+.fan .card{box-shadow:1px 2px 3px var(--shadow)}
+.fan .card.sel{transform:translateY(-14px)}
 
 /* money */
 .money{display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap}
@@ -169,9 +170,9 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .payrow .pv{display:flex; align-items:center; gap:8px; font:900 20px var(--font-ui); font-variant-numeric:tabular-nums}
 
 /* cards: long narrow strips filled with the suit color, the character printed at the top and again upside-down at the bottom */
-.card{--w:40px; --f:calc(var(--w)*.74); width:var(--w); height:calc(var(--w)*2.7); flex:none; position:relative; display:flex; flex-direction:column; justify-content:space-between; align-items:center; padding:calc(var(--w)*.1) 0; border-radius:calc(var(--w)*.14); border:max(1px,calc(var(--w)*.05)) solid var(--edge); background:var(--face); color:var(--cink); box-shadow:0 2px 4px var(--shadow); font-family:var(--font-card); transition:transform .15s ease, box-shadow .15s ease; overflow:hidden}
+.card{--w:40px; --f:calc(var(--w)*.82); width:var(--w); height:calc(var(--w)*3.3); flex:none; position:relative; display:flex; flex-direction:column; justify-content:space-between; align-items:center; padding:calc(var(--w)*.14) 0; border-radius:calc(var(--w)*.12); border:max(1px,calc(var(--w)*.05)) solid var(--edge); background:var(--face); color:var(--cink); box-shadow:0 2px 4px var(--shadow); font-family:var(--font-brush); transition:transform .15s ease, box-shadow .15s ease; overflow:hidden}
 .card::after{content:""; position:absolute; inset:calc(var(--w)*.07); border:1px solid var(--frame); border-radius:calc(var(--w)*.08); pointer-events:none}
-.card .ch{font-size:var(--f); font-weight:900; line-height:1}
+.card .ch{font-size:var(--f); font-weight:700; line-height:1}
 .card .ch.b{transform:rotate(180deg)}
 .card.y{--face:#f3a531; --edge:#a86a0e; --frame:rgba(80,40,0,.35); --cink:#1d1408}
 .card.r{--face:#df3f33; --edge:#8f1d14; --frame:rgba(60,0,0,.35); --cink:#1a0605}
@@ -292,10 +293,11 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .back{width:20px; height:54px}
   :root{--hand-w:27px} :root.big{--hand-w:31px}
   .mine{flex-direction:row; align-items:flex-start; gap:6px}
-  .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:96px; flex:none; gap:3px}
+  .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:78px; flex:none; gap:3px}
   .mehead .melds{justify-content:flex-start; flex:none} .mehead .cashbox{font-size:14px; padding:2px 6px}
   .slabel{font-size:14px}
-  .hand{flex:1; flex-wrap:nowrap; justify-content:flex-start; padding:6px 4px 2px; gap:3px; overflow-x:auto}
+  .hand{flex:1; min-width:0; flex-wrap:nowrap; justify-content:safe center; padding:16px 4px 2px; gap:6px; overflow-x:auto}
+  .mine{min-width:0}
   .bar{position:fixed; top:0; right:0; bottom:0; width:150px; border-top:none; border-left:1px solid var(--line); box-shadow:-4px 0 14px var(--shadow)}
   .bar-in{height:100%; padding:6px 8px; padding-right:max(8px, env(safe-area-inset-right,0px))}
   #msg{font-size:15px}
@@ -955,6 +957,21 @@ function statHTML(){
 function actBtn(cls,act,pic,label,disabled){
   return `<button class="act ${cls}" type="button" data-act="${act}" aria-label="${label}" ${disabled?'disabled':''}><span class="pic">${pic}</span><span class="al">${label}</span></button>`;
 }
+/* Group a hand for display: 將士象 / 車馬包 of one color, 3–4 卒 of different colors, identical cards, then leftovers by family. */
+function arrangeHand(hand){
+  const left=hand.slice().sort((a,b)=>a.t-b.t||a.id-b.id),out=[];
+  const take=t=>{const i=left.findIndex(c=>c.t===t);return i<0?null:left.splice(i,1)[0];};
+  const has=t=>left.some(c=>c.t===t);
+  for(let c=0;c<4;c++)for(const b of [0,3]){
+    while(has(c*7+b)&&has(c*7+b+1)&&has(c*7+b+2))out.push([take(c*7+b),take(c*7+b+1),take(c*7+b+2)]);
+  }
+  for(;;){const cols=[0,1,2,3].filter(c=>has(c*7+6));if(cols.length<3)break;out.push(cols.map(c=>take(c*7+6)));}
+  for(let t=0;t<28;t++){const n=left.filter(c=>c.t===t).length;if(n>=2){const g=[];for(let k=0;k<n;k++)g.push(take(t));out.push(g);}}
+  const fam=t=>tR(t)===6?99:tC(t)*2+(tR(t)<=2?0:1);
+  const rest={};for(const c of left)(rest[fam(c.t)]=rest[fam(c.t)]||[]).push(c);
+  for(const k of Object.keys(rest).sort((a,b)=>a-b))out.push(rest[k]);
+  return out.sort((a,b)=>a[0].t-b[0].t);
+}
 let SYNC=null;
 function render(){
   if(!G)return;
@@ -999,22 +1016,19 @@ function render(){
   const choosing=G.waiting&&G.waiting.kind==='discard';
   $('#hand').className='hand'+(G.turn===0&&!G.over?' on':'');
   const newId=G.newIds[0];
-  // hold the cards the way people do: one fanned stack per family — 將士象 and 車馬包 of each color, and all the 卒 together
-  const fam=t=>tR(t)===6?8:tC(t)*2+(tR(t)<=2?0:1);
-  const stacks=[];
-  for(let f=0;f<=8;f++){
-    const cs=me.hand.filter(x=>fam(x.t)===f);
-    const per=isLand()&&innerHeight<600?3:4;
-    for(let k=0;k<cs.length;k+=per)stacks.push(cs.slice(k,k+per));
-  }
-  $('#hand').innerHTML=stacks.map(cs=>`<div class="stack">${cs.map(x=>{
+  // sort the hand the way a player does: finished sets side by side, then the rest by family
+  const groups=arrangeHand(me.hand);
+  $('#hand').innerHTML=groups.map(cs=>`<div class="fan">${cs.map(x=>{
     const ch=RANKS[tR(x.t)],sel=G.sel===x.id?' sel':'';
     return `<button type="button" class="card lg ${CKEY[tC(x.t)]}${sel}" data-id="${x.id}" aria-label="${tName(x.t)}" ${choosing?'':'tabindex="-1"'}><span class="ch t">${ch}</span><span class="ch b">${ch}</span>${newId!=null&&newId===x.id?'<span class="new" aria-label="新摸的"></span>':''}</button>`;
   }).join('')}</div>`).join('');
-  // size the cards so every stack fits on one line
-  {const hd=$('#hand'),n=Math.max(1,stacks.length),land=isLand()&&innerHeight<600,big=!!S.big;
-   const max=land?(big?33:29):(big?54:48),avail=hd.clientWidth-10;
-   hd.style.setProperty('--hand-w',Math.max(22,Math.min(max,Math.floor((avail-(n-1)*3)/n)))+'px');}
+  // card size: as big as fits — one row when sideways, two rows when upright
+  {const hd=$('#hand'),land=isLand()&&innerHeight<600,big=!!S.big,rows=land?1:(innerHeight>=760?3:2);
+   let w=land?(big?38:34):(big?58:50);
+   const set=()=>hd.style.setProperty('--hand-w',w+'px');
+   const lines=()=>new Set([...hd.children].map(e=>e.offsetTop)).size;
+   set();
+   while(w>18&&(lines()>rows||hd.scrollWidth>hd.clientWidth+1)){w-=2;set();}}
   $('#msg').textContent=G.pm[0]||G.msg;
   const w=G.waiting;let a='';
   if(!w){a=G.over?`<div class="wait">這局結束</div>`:`<div class="wait"><span class="dots"><span></span><span></span><span></span></span></div>`;}
