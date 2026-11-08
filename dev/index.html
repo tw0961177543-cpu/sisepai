@@ -20,7 +20,8 @@
   --c10-hi:#f4f5f7; --c10-lo:#a7acb4; --c10-edge:#868b93; --c10-ink:#353a41;
   --c50-hi:#fbe9a6; --c50-lo:#c8982c; --c50-edge:#a27a1b; --c50-ink:#553b00;
   --bill-a:#e7685b; --bill-b:#b8372d; --bill-edge:#93281f; --bill-ink:#fff6ee;
-  --font-card:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;`n  --font-brush:"LXGW WenKai TC","BiauKai","DFKai-SB","標楷體","Kaiti TC","STKaiti",var(--font-card);
+  --font-card:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
+  --font-brush:"LXGW WenKai TC","BiauKai","DFKai-SB","標楷體","Kaiti TC","STKaiti",var(--font-card);
   --font-ui:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --hand-w:40px; --ui:20px;
   --felt-hi:#2f7a52; --felt-lo:#17452e; --rim-hi:#8a5a33; --rim-lo:#4b2c16;
@@ -292,10 +293,10 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .back{width:20px; height:54px}
   :root{--hand-w:27px} :root.big{--hand-w:31px}
   .mine{flex-direction:row; align-items:flex-start; gap:6px}
-  .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:96px; flex:none; gap:3px}
+  .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:78px; flex:none; gap:3px}
   .mehead .melds{justify-content:flex-start; flex:none} .mehead .cashbox{font-size:14px; padding:2px 6px}
   .slabel{font-size:14px}
-  .hand{flex:1; flex-wrap:nowrap; justify-content:center; padding:16px 4px 2px; gap:8px; overflow-x:auto}
+  .hand{flex:1; flex-wrap:nowrap; justify-content:center; padding:16px 4px 2px; gap:6px; overflow-x:auto}
   .bar{position:fixed; top:0; right:0; bottom:0; width:150px; border-top:none; border-left:1px solid var(--line); box-shadow:-4px 0 14px var(--shadow)}
   .bar-in{height:100%; padding:6px 8px; padding-right:max(8px, env(safe-area-inset-right,0px))}
   #msg{font-size:15px}
@@ -1020,10 +1021,13 @@ function render(){
     const ch=RANKS[tR(x.t)],sel=G.sel===x.id?' sel':'';
     return `<button type="button" class="card lg ${CKEY[tC(x.t)]}${sel}" data-id="${x.id}" aria-label="${tName(x.t)}" ${choosing?'':'tabindex="-1"'}><span class="ch t">${ch}</span><span class="ch b">${ch}</span>${newId!=null&&newId===x.id?'<span class="new" aria-label="新摸的"></span>':''}</button>`;
   }).join('')}</div>`).join('');
-  // card size: one row when sideways, up to two rows when upright
-  {const hd=$('#hand'),n=Math.max(1,me.hand.length),g=groups.length,land=isLand()&&innerHeight<600,big=!!S.big;
-   const rows=land?1:2,max=land?(big?40:36):(big?54:46),avail=(hd.clientWidth-12)*rows-g*10;
-   hd.style.setProperty('--hand-w',Math.max(18,Math.min(max,Math.floor(avail/(n*1.04)*(land?1:.9))))+'px');}
+  // card size: as big as fits — one row when sideways, two rows when upright
+  {const hd=$('#hand'),land=isLand()&&innerHeight<600,big=!!S.big,rows=land?1:2;
+   let w=land?(big?38:34):(big?58:50);
+   const set=()=>hd.style.setProperty('--hand-w',w+'px');
+   const lines=()=>new Set([...hd.children].map(e=>e.offsetTop)).size;
+   set();
+   while(w>18&&(lines()>rows||hd.scrollWidth>hd.clientWidth+1)){w-=2;set();}}
   $('#msg').textContent=G.pm[0]||G.msg;
   const w=G.waiting;let a='';
   if(!w){a=G.over?`<div class="wait">這局結束</div>`:`<div class="wait"><span class="dots"><span></span><span></span><span></span></span></div>`;}
