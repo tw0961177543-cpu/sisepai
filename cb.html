@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>四色牌登入</title>
+<style>body{font:22px/1.5 sans-serif;text-align:center;padding:48px 16px;margin:0;background:#fff;color:#222}
+a{display:block;margin:32px auto;padding:24px;background:#06C755;color:#fff;border-radius:16px;text-decoration:none;font-size:28px;font-weight:bold;max-width:420px}
+small{color:#666;font-size:17px}</style></head>
+<body>
+<p id="msg">LINE 登入完成</p>
+<a id="go" href="#">回到四色牌</a>
+<small>如果沒有自動跳回去，請按上面的綠色按鈕。</small>
+<script>
+var q=location.search||'';
+if(/[?&]error=/.test(q))document.getElementById('msg').textContent='LINE 登入沒有完成';
+var u='intent://cb'+q+'#Intent;scheme=sisepai;package=tw.family.sisepai;end';
+document.getElementById('go').href=u;
+setTimeout(function(){location.href=u;},300);
+</script>
+</body></html>
