@@ -55,7 +55,7 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 
 #app{max-width:900px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:10px 16px; display:flex; flex-direction:column; gap:12px}
 
-.top{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.top{display:flex; align-items:center; gap:8px}
 .brand{font:900 26px/1 var(--font-card); letter-spacing:.04em}
 .meta{flex:1; min-width:0; color:var(--muted); font-size:16px; font-weight:500}
 .tbtn{font:700 17px var(--font-ui); padding:8px 14px; border-radius:10px; border:2px solid var(--line); background:var(--panel); color:var(--ink)}
@@ -68,8 +68,16 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .table{grid-template-columns:minmax(80px,auto) minmax(0,1fr) minmax(80px,auto); grid-template-rows:auto minmax(0,1fr); gap:4px 6px}
   .s-left{grid-column:1; grid-row:2} .s-right{grid-column:3; grid-row:2}
   .felt{grid-column:2; grid-row:2}
-  .s-top{flex-direction:row; gap:8px}
-  .s-top .sinfo{text-align:left}
+  .table .s-top{flex-direction:row; gap:8px}
+  .table .s-top .sinfo{text-align:left}
+  .table .s-top .osub{justify-content:flex-start}
+}
+@media (max-width:699px) and (orientation:portrait){
+  .brand{font-size:21px} .meta{font-size:14px} .tbtn{padding:6px 9px; font-size:15px}
+  .card.rv{--w:18px} .card.md{--w:40px}
+  .av.seat-av{width:42px; height:42px; font-size:21px}
+  .felt{min-height:0; padding:10px 12px}
+  #app{gap:6px}
 }
 .seat{display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 4px; border-radius:14px; border:3px solid transparent; min-width:0; text-align:center}
 .seat.empty{visibility:hidden}
@@ -108,7 +116,8 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .me-av .av{width:30px; height:30px; font-size:16px}
 .prof{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; background:var(--felt); font-weight:900; font-size:20px}
 .oname{font-weight:900; font-size:17px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.osub{font-size:14px; color:var(--muted); line-height:1.2}
+.osub{font-size:13px; color:var(--muted); line-height:1.2; white-space:nowrap; display:flex; align-items:center; gap:2px; justify-content:center}
+.osub .coin{width:16px; height:16px; font-size:7px}
 .ocash{display:flex; align-items:center; gap:4px; font:900 15px var(--font-ui); font-variant-numeric:tabular-nums}
 .mini{display:flex; flex-wrap:wrap; gap:2px}
 .mini .grp{display:flex; gap:1px; margin-right:3px}
@@ -264,13 +273,13 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .top{gap:6px} .brand{font-size:18px} .meta{font-size:13px} .tbtn{padding:3px 9px; font-size:14px; border-radius:8px}
   .table{min-height:0; height:100%}
   .felt{min-height:0; height:100%; overflow:hidden; padding:5px 12px; gap:2px}
-  .seat{padding:2px; gap:1px} .s-top{padding:0 6px}
+  .seat{padding:2px; gap:1px} .table .s-top{padding:0 6px}
   .av.seat-av{width:34px; height:34px; font-size:17px}
   .oname{font-size:15px} .osub{font-size:12px}
   .card.md{--w:32px} .card.rv{--w:15px}
   .who{font-size:14px}
   .back{width:20px; height:54px}
-  :root{--hand-w:28px} :root.big{--hand-w:32px}
+  :root{--hand-w:27px} :root.big{--hand-w:31px}
   .mine{flex-direction:row; align-items:flex-start; gap:6px}
   .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:96px; flex:none; gap:3px}
   .mehead .melds{justify-content:flex-start; flex:none} .mehead .cashbox{font-size:14px; padding:2px 6px}
@@ -946,7 +955,7 @@ function render(){
   const pos=N===4?{1:'R',2:'T',3:'L'}:{1:'R',2:'L'};
   const pend=G.last&&!G.over?G.last:null; // the card everybody is looking at right now
   const river=i=>{
-    const all=G.players[i].discards,cut=Math.max(0,all.length-(isLand()&&innerHeight<600?12:20)),d=all.slice(cut);
+    const all=G.players[i].discards,cut=Math.max(0,all.length-12),d=all.slice(cut);
     return d.map((t,k)=>cardHTML(t,'rv'+(pend&&pend.p===i&&k===d.length-1?' just':''))).join('');
   };
   for(const s of ['T','L','R']){const el=$('#seat'+s);el.innerHTML='';el.className='seat s-'+({T:'top',L:'left',R:'right'})[s]+' empty';}
