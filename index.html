@@ -22,7 +22,8 @@
   --bill-a:#e7685b; --bill-b:#b8372d; --bill-edge:#93281f; --bill-ink:#fff6ee;
   --font-card:"Noto Serif TC","Noto Serif CJK TC","Songti TC","PMingLiU",serif;
   --font-ui:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",sans-serif;
-  --hand-w:50px; --hand-h:82px; --hand-f:36px; --ui:20px;
+  --hand-w:40px; --ui:20px;
+  --felt-hi:#2f7a52; --felt-lo:#17452e; --rim-hi:#8a5a33; --rim-lo:#4b2c16;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -44,7 +45,7 @@
   --card-bg:#f1e9d5; --card-edge:#8f866f; --back:#8c3a2c; --back-line:#c66a5b;
   color-scheme:dark;
 }
-:root.big{--hand-w:58px; --hand-h:94px; --hand-f:42px; --ui:22px}
+:root.big{--hand-w:48px; --ui:22px}
 
 *{box-sizing:border-box}
 body{background:var(--bg); color:var(--ink); font-family:var(--font-ui); font-size:var(--ui); line-height:1.4; -webkit-user-select:none; user-select:none}
@@ -52,19 +53,55 @@ input{-webkit-user-select:text; user-select:text}
 button{font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent}
 button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 
-#app{max-width:720px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:10px 16px; display:flex; flex-direction:column; gap:12px}
+#app{max-width:900px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:10px 16px; display:flex; flex-direction:column; gap:12px}
 
-.top{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.top{display:flex; align-items:center; gap:8px}
 .brand{font:900 26px/1 var(--font-card); letter-spacing:.04em}
 .meta{flex:1; min-width:0; color:var(--muted); font-size:16px; font-weight:500}
 .tbtn{font:700 17px var(--font-ui); padding:8px 14px; border-radius:10px; border:2px solid var(--line); background:var(--panel); color:var(--ink)}
 
-.opps{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px}
-.opps.n3{grid-template-columns:repeat(2, minmax(0,1fr))}
-.opp{background:var(--panel); border:3px solid transparent; border-radius:14px; padding:8px; min-width:0; display:flex; flex-direction:column; gap:6px}
-.opp.on{border-color:var(--on); animation:glow 1.2s ease-in-out infinite alternate}
+/* the table, seen from grandma's chair: a trapezoid of felt, friends seated top / left / right, each one's discards in front of them */
+.table{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:auto auto; gap:4px; align-items:center}
+.s-top{grid-column:2; grid-row:1} .s-left{grid-column:1; grid-row:1} .s-right{grid-column:3; grid-row:1}
+.felt{grid-column:1 / -1; grid-row:2}
+@media (min-width:700px), (orientation:landscape){
+  .table{grid-template-columns:minmax(80px,auto) minmax(0,1fr) minmax(80px,auto); grid-template-rows:auto minmax(0,1fr); gap:4px 6px}
+  .s-left{grid-column:1; grid-row:2} .s-right{grid-column:3; grid-row:2}
+  .felt{grid-column:2; grid-row:2}
+  .table .s-top{flex-direction:row; gap:8px}
+  .table .s-top .sinfo{text-align:left}
+  .table .s-top .osub{justify-content:flex-start}
+}
+@media (max-width:699px) and (orientation:portrait){
+  .brand{font-size:21px} .meta{font-size:14px} .tbtn{padding:6px 9px; font-size:15px}
+  .felt .card.rv{--w:16px} .center .card.md{--w:36px}
+  .center .who{font-size:14px; white-space:normal; max-width:5.5em}
+  .felt .felt-mid{gap:4px}
+  .av.seat-av{width:38px; height:38px; font-size:19px}
+  #actions .act{min-height:72px}
+  main#app{padding-left:max(8px, env(safe-area-inset-left,0px)); padding-right:max(8px, env(safe-area-inset-right,0px))}
+  .mine .hand{gap:3px; padding:10px 4px 6px}
+  .felt{min-height:0; padding:10px 12px}
+  #app{gap:6px}
+}
+.seat{display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 4px; border-radius:14px; border:3px solid transparent; min-width:0; text-align:center}
+.seat.empty{visibility:hidden}
+.s-top{justify-content:center; padding:4px 6px}
+.seat.on{border-color:var(--on); background:var(--panel); animation:glow 1.2s ease-in-out infinite alternate}
 @keyframes glow{from{box-shadow:0 0 0 0 transparent} to{box-shadow:0 0 0 4px var(--on)}}
-.opp-h{display:flex; align-items:center; gap:6px; min-width:0}
+.sp{position:relative}
+.sp .vc-dot{position:absolute; right:-4px; bottom:-2px}
+.av.seat-av{width:48px; height:48px; font-size:24px; box-shadow:0 2px 6px var(--shadow); border:2px solid var(--panel)}
+.seat .mini{justify-content:center; max-width:110px}
+.zh{background:var(--hu); color:#fff}
+.felt{position:relative; display:flex; flex-direction:column; justify-content:space-between; gap:6px; min-height:230px; padding:12px 14px; isolation:isolate}
+.felt::before{content:""; position:absolute; inset:0; z-index:-1; clip-path:polygon(9% 0, 91% 0, 100% 100%, 0 100%); background:radial-gradient(120% 90% at 50% 55%, var(--felt-hi), var(--felt-lo)); }
+.felt::after{content:""; position:absolute; inset:-5px -5px -7px; z-index:-2; clip-path:polygon(9% 0, 91% 0, 100% 100%, 0 100%); background:linear-gradient(var(--rim-hi), var(--rim-lo))}
+.felt-mid{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:6px; flex:1}
+.river{display:flex; flex-wrap:wrap; gap:2px; align-content:flex-start; min-height:8px}
+.r-top{justify-content:center; padding-inline:8%}
+.r-me{justify-content:center; align-content:flex-end}
+.r-left{justify-content:flex-start} .r-right{justify-content:flex-end}
 .av{flex:none; width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font:900 18px var(--font-card)}
 .av1{background:var(--g-band); color:var(--g-band-ink)}
 .av2{background:var(--r-band); color:var(--r-band-ink)}
@@ -84,28 +121,35 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .me-av .av{width:30px; height:30px; font-size:16px}
 .prof{display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; background:var(--felt); font-weight:900; font-size:20px}
 .oname{font-weight:900; font-size:17px; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-.osub{font-size:14px; color:var(--muted); line-height:1.2}
+.osub{font-size:13px; color:var(--muted); line-height:1.2; white-space:nowrap; display:flex; align-items:center; gap:2px; justify-content:center}
+.osub .coin{width:16px; height:16px; font-size:7px}
 .ocash{display:flex; align-items:center; gap:4px; font:900 15px var(--font-ui); font-variant-numeric:tabular-nums}
 .mini{display:flex; flex-wrap:wrap; gap:2px}
 .mini .grp{display:flex; gap:1px; margin-right:3px}
 .olabel{font-size:12px; color:var(--muted); letter-spacing:.06em}
 .tag{display:inline-block; font-size:11px; font-weight:900; padding:1px 5px; border-radius:6px; background:var(--chi); color:var(--chi-ink); vertical-align:2px}
 
-.center{background:var(--felt); border-radius:18px; padding:14px; display:flex; align-items:center; justify-content:center; gap:22px; min-height:150px}
+.center{display:flex; align-items:center; justify-content:center; gap:14px; color:#f3f6ef}
 .cwrap{display:flex; flex-direction:column; align-items:center; gap:4px}
-.who{font-size:18px; font-weight:700; text-align:center}
-.pile{display:flex; flex-direction:column; align-items:center; gap:6px; font-size:16px; color:var(--muted)}
-.pile b{color:var(--ink); font-size:22px; font-variant-numeric:tabular-nums}
-.back{width:44px; height:72px; border-radius:6px; background:var(--back); box-shadow:3px 3px 0 var(--back-line), 6px 6px 0 var(--back); border:2px solid var(--back-line)}
+.who{font-size:17px; font-weight:900; text-align:center; text-shadow:0 1px 2px rgba(0,0,0,.5); white-space:nowrap}
+.who.big{font-size:20px}
+.pile{display:flex; flex-direction:column; align-items:center; gap:4px; font-size:15px}
+.pile b{font-size:20px; font-variant-numeric:tabular-nums; text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.back{width:26px; height:70px; border-radius:4px; background:repeating-linear-gradient(45deg, var(--back) 0 4px, var(--back-line) 4px 6px); box-shadow:3px 3px 0 var(--back-line), 5px 5px 0 var(--back); border:2px solid #f1e6cf}
 
 .sect{display:flex; flex-direction:column; gap:8px}
-.mehead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.mehead{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.mehead .slabel{white-space:nowrap} .mehead .cashbox{font-size:15px; padding:2px 8px; white-space:nowrap}
 .slabel{font-size:16px; color:var(--muted); font-weight:700}
-.melds{display:flex; flex-wrap:wrap; gap:8px}
-.meld{display:flex; align-items:flex-end; gap:2px; padding:5px; background:var(--felt); border-radius:10px}
-.hand{display:flex; flex-direction:column; gap:12px; padding:14px 8px 10px; border-radius:16px; border:3px solid transparent}
+.melds{display:flex; flex-wrap:wrap; gap:6px; flex:1; justify-content:center}
+.meld{display:flex; align-items:flex-end; gap:1px; padding:3px; background:var(--felt); border-radius:8px}
+.hand{display:flex; flex-wrap:nowrap; justify-content:center; align-items:flex-start; gap:6px 5px; padding:12px 6px 8px; border-radius:16px; border:3px solid transparent}
 .hand.on{border-color:var(--on); background:var(--panel)}
-.row{display:flex; flex-wrap:wrap; gap:6px}
+.stack{display:flex; flex-direction:column; align-items:center}
+#hand{scroll-margin-bottom:150px}
+.stack .card+.card{margin-top:calc(var(--w) * -1.62)}
+.stack .card{box-shadow:0 -1px 3px var(--shadow)}
+.stack .card.sel{transform:translateY(-8px)}
 
 /* money */
 .money{display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap}
@@ -124,23 +168,26 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .payrow .pn{font-weight:900; font-size:18px}
 .payrow .pv{display:flex; align-items:center; gap:8px; font:900 20px var(--font-ui); font-variant-numeric:tabular-nums}
 
-/* cards */
-.card{--w:50px; --h:82px; --f:36px; width:var(--w); height:var(--h); flex:none; position:relative; display:flex; flex-direction:column; align-items:stretch; padding:0; border-radius:6px; background:var(--card-bg); border:1px solid var(--card-edge); box-shadow:0 2px 3px var(--shadow); font-family:var(--font-card); transition:transform .15s ease, box-shadow .15s ease; color:inherit}
-.card .band{height:calc(var(--h)*.2); display:flex; align-items:center; justify-content:center; font:700 calc(var(--f)*.42)/1 var(--font-ui); border-radius:5px 5px 0 0}
-.card .ch{flex:1; display:flex; align-items:center; justify-content:center; font-size:var(--f); font-weight:900; line-height:1}
-.card.lg{--w:var(--hand-w); --h:var(--hand-h); --f:var(--hand-f)}
-.card.md{--w:66px; --h:108px; --f:48px}
-.card.ml{--w:32px; --h:52px; --f:21px}
-.card.bt{--w:26px; --h:42px; --f:18px; box-shadow:none}
-.card.sm{--w:19px; --h:31px; --f:13px; border-radius:3px; box-shadow:none}
-.card.sm .band,.card.bt .band{font-size:0; border-radius:2px 2px 0 0}
-.card.y .band{background:var(--y-band); color:var(--y-band-ink)} .card.y .ch{color:var(--y-ink)}
-.card.r .band{background:var(--r-band); color:var(--r-band-ink)} .card.r .ch{color:var(--r-ink)}
-.card.g .band{background:var(--g-band); color:var(--g-band-ink)} .card.g .ch{color:var(--g-ink)}
-.card.w .band{background:var(--w-band); color:var(--w-band-ink)} .card.w .ch{color:var(--w-ink)}
-.card.sel{transform:translateY(-14px); box-shadow:0 0 0 4px var(--sel), 0 8px 14px var(--shadow)}
-.card .new{position:absolute; top:-9px; right:-9px; width:18px; height:18px; border-radius:50%; background:var(--hu); border:2px solid var(--card-bg)}
+/* cards: long narrow strips filled with the suit color, the character printed at the top and again upside-down at the bottom */
+.card{--w:40px; --f:calc(var(--w)*.74); width:var(--w); height:calc(var(--w)*2.7); flex:none; position:relative; display:flex; flex-direction:column; justify-content:space-between; align-items:center; padding:calc(var(--w)*.1) 0; border-radius:calc(var(--w)*.14); border:max(1px,calc(var(--w)*.05)) solid var(--edge); background:var(--face); color:var(--cink); box-shadow:0 2px 4px var(--shadow); font-family:var(--font-card); transition:transform .15s ease, box-shadow .15s ease; overflow:hidden}
+.card::after{content:""; position:absolute; inset:calc(var(--w)*.07); border:1px solid var(--frame); border-radius:calc(var(--w)*.08); pointer-events:none}
+.card .ch{font-size:var(--f); font-weight:900; line-height:1}
+.card .ch.b{transform:rotate(180deg)}
+.card.y{--face:#f3a531; --edge:#a86a0e; --frame:rgba(80,40,0,.35); --cink:#1d1408}
+.card.r{--face:#df3f33; --edge:#8f1d14; --frame:rgba(60,0,0,.35); --cink:#1a0605}
+.card.g{--face:#2f9a4a; --edge:#145c27; --frame:rgba(0,40,10,.35); --cink:#06180b}
+.card.w{--face:#f6f2e7; --edge:#a39b86; --frame:rgba(40,40,30,.3); --cink:#151515}
+.card.lg{--w:var(--hand-w)}
+.card.md{--w:50px}
+.card.ml{--w:22px}
+.card.rv{--w:22px; box-shadow:0 1px 2px var(--shadow)}
+.card.bt{--w:18px; box-shadow:none}
+.card.sm{--w:13px; box-shadow:none}
+.card.sm::after,.card.bt::after{display:none}
+.card.sel{transform:translateY(-12px); box-shadow:0 0 0 4px var(--sel), 0 8px 14px var(--shadow); z-index:3}
+.card .new{position:absolute; top:3px; right:3px; width:14px; height:14px; border-radius:50%; background:#fff; border:3px solid var(--hu); z-index:2}
 .card.hl{animation:drop .35s ease-out}
+.card.just{box-shadow:0 0 0 3px var(--sel)}
 @keyframes drop{from{transform:translateY(-14px) scale(1.06)} to{transform:none}}
 
 /* action bar */
@@ -226,7 +273,36 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .rli.ok{border-color:var(--on); color:var(--on)}
 .rli.cur{background:var(--accent); color:var(--accent-ink); border-color:var(--accent)}
 
-@media (prefers-reduced-motion: reduce){ .card{transition:none} .card.hl,.act.hu,.opp.on,.rec-btn.on,.dots span{animation:none} }
+/* phone turned sideways: everything on one screen, buttons in a column on the right */
+@media (orientation: landscape) and (max-height: 600px){
+  html,body{height:100%; overflow:hidden}
+  #app{max-width:none; margin:0; margin-right:150px; height:100dvh; padding-block:2px 4px; gap:2px; display:grid; grid-template-rows:auto minmax(0,1fr) auto}
+  .top{gap:6px} .brand{font-size:18px} .meta{font-size:13px} .tbtn{padding:3px 9px; font-size:14px; border-radius:8px}
+  .table{min-height:0; height:100%}
+  .felt{min-height:0; height:100%; overflow:hidden; padding:5px 12px; gap:2px}
+  .seat{padding:2px; gap:1px} .table .s-top{padding:0 6px}
+  .av.seat-av{width:34px; height:34px; font-size:17px}
+  .oname{font-size:15px} .osub{font-size:12px}
+  .card.md{--w:28px} .card.rv{--w:14px}
+  .top{position:fixed; top:0; right:0; width:150px; z-index:6; flex-wrap:wrap; justify-content:center; padding:6px 6px 0; gap:4px}
+  .top .brand,.top .meta{display:none}
+  .tbtn{flex:1 1 40%}
+  .bar .bar-in{padding-top:84px}
+  .who{font-size:14px}
+  .back{width:20px; height:54px}
+  :root{--hand-w:27px} :root.big{--hand-w:31px}
+  .mine{flex-direction:row; align-items:flex-start; gap:6px}
+  .mehead{flex-direction:column; align-items:flex-start; flex-wrap:nowrap; width:96px; flex:none; gap:3px}
+  .mehead .melds{justify-content:flex-start; flex:none} .mehead .cashbox{font-size:14px; padding:2px 6px}
+  .slabel{font-size:14px}
+  .hand{flex:1; flex-wrap:nowrap; justify-content:flex-start; padding:6px 4px 2px; gap:3px; overflow-x:auto}
+  .bar{position:fixed; top:0; right:0; bottom:0; width:150px; border-top:none; border-left:1px solid var(--line); box-shadow:-4px 0 14px var(--shadow)}
+  .bar-in{height:100%; padding:6px 8px; padding-right:max(8px, env(safe-area-inset-right,0px))}
+  #msg{font-size:15px}
+  #actions{flex-direction:column; flex:1}
+  .act{min-height:0; flex:1} .act.ghost{flex:0 0 58px}
+  .wait{min-height:0}
+}@media (prefers-reduced-motion: reduce){ .card{transition:none} .card.hl,.act.hu,.seat.on,.rec-btn.on,.dots span{animation:none} }
 </style>
 
 <main id="app">
@@ -234,17 +310,26 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
     <div class="brand">四色牌</div>
     <div class="meta" id="meta"></div>
     <button class="tbtn vc" id="btnVc" type="button" hidden></button>
+    <button class="tbtn" id="btnRot" type="button" aria-label="轉成橫的或直的">⟳ 轉向</button>
     <button class="tbtn" id="btnRules" type="button">規則</button>
     <button class="tbtn" id="btnSet" type="button">設定</button>
   </header>
-  <section class="opps" id="opps" aria-label="牌友"></section>
-  <section class="center" id="center" aria-live="polite"></section>
-  <section class="sect" id="meldSect" hidden>
-    <div class="slabel">亮出的牌</div>
-    <div class="melds" id="melds"></div>
+  <section class="table" id="table" aria-label="牌桌">
+    <div class="seat s-top" id="seatT"></div>
+    <div class="seat s-left" id="seatL"></div>
+    <div class="felt" id="felt">
+      <div class="river r-top" id="rivT"></div>
+      <div class="felt-mid">
+        <div class="river r-left" id="rivL"></div>
+        <div class="center" id="center" aria-live="polite"></div>
+        <div class="river r-right" id="rivR"></div>
+      </div>
+      <div class="river r-me" id="rivB"></div>
+    </div>
+    <div class="seat s-right" id="seatR"></div>
   </section>
-  <section class="sect">
-    <div class="mehead"><div class="slabel" id="handLabel"></div><div class="cashbox" id="myCash"></div></div>
+  <section class="sect mine">
+    <div class="mehead"><div class="slabel" id="handLabel"></div><div class="melds" id="melds"></div><div class="cashbox" id="myCash"></div></div>
     <div class="hand" id="hand"></div>
   </section>
 </main>
@@ -263,9 +348,11 @@ const DEFAULT_RULES={
   players:4, hand:20, dealerExtra:true,
   openDraw:false, chi:'next', peng:true,
   singleJiang:true, pairs:false, mixTrio:false, mixZu:false,
+  chiPair:true, kaiDiscard:true, kaiAdd:true,
   minPts:0, zimo:0, dealerBonus:0,
   base:10, perTai:10, payMode:'shooter', startChips:1000,
-  pts:{'單將':1,'將士象':1,'車馬包':1,'三卒':1,'四卒':2,'坎':3,'四張':6,'對子':0,'碰':1}
+  pts:{'單將':1,'將士象':1,'車馬包':1,'三卒':3,'四卒':4,'坎':3,'四張':6,'明開':6,'對子':0,'吃對':0,'碰':1},
+  v:2
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 let R=clone(DEFAULT_RULES);          // rules of the game being played
@@ -399,7 +486,7 @@ function aiChooseChi(pl,opts){
   if(!opts.length)return null;
   if(Math.random()>(S.level==='easy'?0.75:0.85))return null;
   const cnt=counts(pl.hand);
-  const ok=opts.filter(o=>o.use.every(x=>cnt[x]<3));
+  const ok=opts.filter(o=>o.use.every(x=>cnt[x]<3)&&(o.kind!=='吃對'||Math.random()<0.3));
   if(!ok.length)return null;
   return ok.sort((a,b)=>b.pts-a.pts)[0];
 }
@@ -416,7 +503,7 @@ const $=s=>document.querySelector(s);
 const ABORT={abort:1};
 const AI_SET={4:[null,['阿珠嬸','珠','av1'],['阿土伯','土','av2'],['阿花姨','花','av3']],3:[null,['阿珠嬸','珠','av1'],['阿花姨','花','av3']]};
 const SEATS={4:['','下家','對家','上家'],3:['','下家','上家']};
-const KL={'單將':'單張將','將士象':'將士象','車馬包':'車馬包','三卒':'三張卒','四卒':'四張卒','坎':'坎','四張':'四張一樣','對子':'對子','碰':'碰'};
+const KL={'單將':'單張將','將士象':'將士象','車馬包':'車馬包','三卒':'三張卒','四卒':'四張卒','坎':'坎','四張':'暗開','明開':'明開','對子':'對子','吃對':'一對','碰':'碰'};
 let SAVED=clone(DEFAULT_RULES);       // rules being edited; used from the next deal
 let G=null, GID=0, ROUND=0, NEXT_DEALER=0, STARTED=false;
 let STATS={games:0,wins:[0,0,0,0],pts:[0,0,0,0],draws:0};
@@ -443,7 +530,10 @@ function loadPrefs(){
   const s=store.get('ssp-settings'); if(s&&typeof s==='object')Object.assign(S,s);
   const st=store.get('ssp-stats'); if(st&&Array.isArray(st.wins))STATS=Object.assign({pts:[0,0,0,0]},st);
   const r=store.get('ssp-rules');
-  if(r&&typeof r==='object'){SAVED=Object.assign(clone(DEFAULT_RULES),r);SAVED.pts=Object.assign(clone(DEFAULT_RULES.pts),r.pts||{});}
+  if(r&&typeof r==='object'){
+    SAVED=Object.assign(clone(DEFAULT_RULES),r);SAVED.pts=Object.assign(clone(DEFAULT_RULES.pts),r.pts||{});
+    if(!(r.v>=2)){SAVED.pts['三卒']=3;SAVED.pts['四卒']=4;SAVED.v=2;saveRules();} // family's 卒 scoring
+  }
   else if(s){if(typeof s.pairs==='boolean')SAVED.pairs=s.pairs;if(typeof s.minPts==='number')SAVED.minPts=s.minPts;}
   const ch=store.get('ssp-chips');
   CHIPS=Array.isArray(ch)&&ch.length===4?ch.map(x=>+x||0):[0,1,2,3].map(()=>SAVED.startChips);
@@ -481,8 +571,9 @@ function coinSound(){
 const LINES=[
   ['start','開始矣，來拍牌！','開始囉，來打牌'],
   ['turn','換你矣','換你了'],
-  ['canhu','你會使胡矣！','可以胡了'],
-  ['ask_hu','欲胡無？','要胡嗎'],
+  ['canhu','你到矣！','可以胡了'],
+  ['ask_hu','欲到無？','要胡嗎'],
+  ['ask_kai','欲開無？','要開嗎'],
   ['ask_peng','欲碰無？','要碰嗎'],
   ['ask_chi','欲食無？','要吃嗎'],
   ['ask_keep','欲收起來無？','要收起來嗎'],
@@ -491,9 +582,10 @@ const LINES=[
   ['pass','無愛','不要'],
   ['peng','碰！','碰'],
   ['chi','食！','吃'],
-  ['hu_me','恭喜！你胡矣！','恭喜你胡了'],
-  ['hu_ai','予人胡去矣','別人胡了'],
-  ['draw','流局，無人胡','流局，沒人胡'],
+  ['kai','開！','開'],
+  ['hu_me','恭喜！你到矣！','恭喜你胡了'],
+  ['hu_ai','別人到矣','別人胡了'],
+  ['draw','流局，無人到','流局，沒人胡'],
   ['joined','有人來矣！','有人加入了'],
 ];
 const VOICE=[...LINES.map(([k,tw,zh])=>({k,tw,zh,t:null})),...Array.from({length:28},(_,t)=>({k:'c'+t,tw:tName(t),zh:tName(t),t}))];
@@ -552,10 +644,11 @@ async function keepAwake(){try{if(navigator.wakeLock)WL=await navigator.wakeLock
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&G&&!G.over)keepAwake();});
 
 /* ---------- game state helpers ---------- */
+const isLand=()=>innerWidth>innerHeight;
 const aiSec=()=>{const v=Math.round(+S.aiSec);return v>=3&&v<=10?v:3;};
 const delay=()=>aiSec()*1000;
 function sleep(ms){const gid=G.id;return new Promise((res,rej)=>setTimeout(()=>{if(!G||G.id!==gid)rej(ABORT);else res();},ms));}
-function waitHuman(w){return new Promise(res=>{G.waiting={...w,resolve:v=>{G.waiting=null;res(v);render();}};render();});}
+function waitHuman(w){return new Promise(res=>{G.waiting={...w,resolve:v=>{G.waiting=null;res(v);render();}};render();try{$('#hand').scrollIntoView({block:'nearest',behavior:'smooth'});}catch(e){}});}
 const sortHand=pl=>pl.hand.sort((a,b)=>a.t-b.t||a.id-b.id);
 const nameOf=i=>G.players[i].name;
 const NP=()=>G.players.length;
@@ -616,6 +709,7 @@ function aiAnswer(s,w){
   if(w.kind==='discard'){if(w.canHu)return {type:'hu'};return {type:'discard',id:pickDiscard(pl.hand,'ai').id};}
   if(w.kind==='drawn'){if(w.canHu)return {type:'hu'};return {type:aiKeep(pl.hand,w.t)?'keep':'pass'};}
   if(w.canHu)return {type:'hu'};
+  if(w.canKai&&Math.random()<0.9)return {type:'kai'};
   if(w.canPeng&&aiWantsPeng(pl,w.t))return {type:'peng'};
   const o=aiChooseChi(pl,w.chiOpts||[]);
   return o?{type:'chi',opt:o}:{type:'pass'};
@@ -675,7 +769,7 @@ async function gameLoop(){
 async function afterRelease(d,t){
   const cl=await claimPhase(d,t);
   if(cl.type==='hu'){endWin(cl.p,t,d,dealerBonus(cl.p));return null;}
-  if(cl.type==='peng'||cl.type==='chi'){await applyClaim(cl,d,t);return {p:cl.p,draw:false,claimed:true};}
+  if(cl.type==='peng'||cl.type==='chi'||cl.type==='kai'){await applyClaim(cl,d,t);return {p:cl.p,draw:false,claimed:true};}
   return {p:nextOf(d),draw:true,claimed:false};
 }
 function doDiscard(p,card){
@@ -685,12 +779,27 @@ function doDiscard(p,card){
   G.last={p,t:card.t};G.newIds[p]=null;G.drawnT[p]=null;if(p===0)G.sel=null;
   sayAll(ck(card.t),true);
 }
+/* 加開: a 碰 on the table plus the 4th card in hand becomes 明開 */
+function addKaiT(pl){
+  if(!R.kaiAdd||pl.hand.length<2)return -1;
+  const m=pl.melds.find(m=>m.kind==='碰'&&pl.hand.some(c=>c.t===m.types[0]));
+  return m?m.types[0]:-1;
+}
+function doAddKai(p,t){
+  const pl=G.players[p],m=pl.melds.find(m=>m.kind==='碰'&&m.types[0]===t);
+  if(!m)return;
+  removeTypes(pl,[t]);
+  Object.assign(m,{types:[t,t,t,t],kind:'明開',pts:R.pts['明開']||0});
+  G.newIds[p]=null;if(p===0)G.sel=null;
+  sayAll('kai',true);announce(`${pl.name} 開 ${tName(t)}`);
+}
 async function discardPhase(p,bonus){
   const pl=G.players[p];G.turn=p;
-  const win=canWin(pl,null,bonus);
   if(isAI(p)){
     if(!G.msg.includes('摸'))announce(`${pl.name} 想牌中…`);else render();
     await sleep(delay());
+    const kt=addKaiT(pl);if(kt>=0){doAddKai(p,kt);await sleep(delay()*0.6);}
+    const win=canWin(pl,null,bonus);
     if(win)return {hu:true};
     const card=pickDiscard(pl.hand,'ai');
     doDiscard(p,card);announce(`${pl.name} 打出 ${tName(card.t)}`);
@@ -698,9 +807,16 @@ async function discardPhase(p,bonus){
   }
   const pre=G.drawnT[p]!=null?`摸到 ${tName(G.drawnT[p])}。`:'';
   announce(`輪到 ${pl.name}`);
-  promptSeat(p,win?'可以胡了！':pre+'打一張牌');
-  sayTo(p,win?'canhu':'turn');
-  const r=await askSeat(p,{kind:'discard',canHu:!!win});delete G.pm[p];
+  let r,win,first=true;
+  for(;;){
+    win=canWin(pl,null,bonus);
+    const kt=addKaiT(pl);
+    promptSeat(p,win?'可以胡了！':kt>=0?'可以開':pre+'打一張牌');
+    if(first||win)sayTo(p,win?'canhu':kt>=0?'ask_kai':'turn');first=false;
+    r=await askSeat(p,{kind:'discard',canHu:!!win,kaiT:kt});delete G.pm[p];
+    if(r&&r.type==='kai'&&kt>=0){doAddKai(p,kt);continue;}
+    break;
+  }
   if(r&&r.type==='hu'&&win)return {hu:true};
   let card=r&&r.type==='discard'?pl.hand.find(c=>c.id===r.id):null;
   if(!card)card=pickDiscard(pl.hand,'ai');
@@ -712,27 +828,31 @@ async function claimPhase(d,t){
   const opts={};
   for(const q of order){
     const hu=!!canWin(P[q],t,dealerBonus(q));
-    const peng=R.peng&&P[q].hand.filter(c=>c.t===t).length>=2;
+    const same=P[q].hand.filter(c=>c.t===t).length;
+    const peng=R.peng&&same>=2;
+    const kai=R.kaiDiscard&&same>=3;
     const chi=(R.chi==='any'||(R.chi==='next'&&q===order[0]))?chiOptions(P[q].hand,t):[];
-    if(hu||peng||chi.length)opts[q]={hu,peng,chi};
+    if(R.chiPair&&q===order[0]&&same===1)chi.push({use:[t],kind:'吃對',pts:R.pts['吃對']||0}); // 上家打一張，手上有一張一樣的
+    if(hu||kai||peng||chi.length)opts[q]={hu,kai,peng,chi};
   }
-  const LV=a=>a.type==='hu'?3:a.type==='peng'?2:a.type==='chi'?1:0;
+  const LV=a=>a.type==='hu'?4:a.type==='kai'?3:a.type==='peng'?2:a.type==='chi'?1:0;
   let best=null;
   const consider=(q,a)=>{const lv=LV(a),pos=order.indexOf(q);if(!lv)return;if(!best||lv>best.lv||(lv===best.lv&&pos<best.pos))best={...a,p:q,lv,pos};};
-  for(const q of order)if(opts[q]&&isAI(q)){const o=opts[q];consider(q,aiAnswer(q,{kind:'claim',t,canHu:o.hu,canPeng:o.peng,chiOpts:o.chi}));}
+  for(const q of order)if(opts[q]&&isAI(q)){const o=opts[q];consider(q,aiAnswer(q,{kind:'claim',t,canHu:o.hu,canKai:o.kai,canPeng:o.peng,chiOpts:o.chi}));}
   let waited=false;
   for(const q of order){
     if(!opts[q]||isAI(q))continue;
     const o=opts[q],pos=order.indexOf(q);
     const allow=lv=>!best||lv>best.lv||(lv===best.lv&&pos<best.pos);
-    const w={kind:'claim',t,canHu:o.hu&&allow(3),canPeng:o.peng&&allow(2),chiOpts:allow(1)?o.chi:[]};
-    if(!w.canHu&&!w.canPeng&&!w.chiOpts.length)continue;
+    const w={kind:'claim',t,canHu:o.hu&&allow(4),canKai:o.kai&&allow(3),canPeng:o.peng&&allow(2),chiOpts:allow(1)?o.chi:[]};
+    if(!w.canHu&&!w.canKai&&!w.canPeng&&!w.chiOpts.length)continue;
     if(!waited){await sleep(400);waited=true;}
-    const can=[w.canHu&&'胡',w.canPeng&&'碰',w.chiOpts.length&&'吃'].filter(Boolean).join('、');
+    const can=[w.canHu&&'胡',w.canKai&&'開',w.canPeng&&'碰',w.chiOpts.length&&'吃'].filter(Boolean).join('、');
     promptSeat(q,`可以${can}`);
-    sayTo(q,w.canHu?'ask_hu':w.canPeng?'ask_peng':'ask_chi');
+    sayTo(q,w.canHu?'ask_hu':w.canKai?'ask_kai':w.canPeng?'ask_peng':'ask_chi');
     let a=await askSeat(q,w)||{type:'pass'};delete G.pm[q];
     if(a.type==='hu'&&!w.canHu)a={type:'pass'};
+    if(a.type==='kai'&&!w.canKai)a={type:'pass'};
     if(a.type==='peng'&&!w.canPeng)a={type:'pass'};
     if(a.type==='chi'){
       const k=x=>x.kind+':'+x.use.slice().sort((m,n)=>m-n).join(',');
@@ -750,7 +870,11 @@ function removeTypes(pl,types){for(const t of types){const i=pl.hand.findIndex(c
 async function applyClaim(cl,d,t){
   const P=G.players,pl=P[cl.p];
   P[d].discards.pop();
-  if(cl.type==='peng'){
+  if(cl.type==='kai'){
+    removeTypes(pl,[t,t,t]);
+    pl.melds.push({types:[t,t,t,t],kind:'明開',pts:R.pts['明開']||0});
+    sayAll('kai',true);G.msg=`${pl.name} 開 ${tName(t)}`;
+  }else if(cl.type==='peng'){
     removeTypes(pl,[t,t]);
     pl.melds.push({types:[t,t,t],kind:'碰',pts:R.pts['碰']||0});
     sayAll('peng',true);G.msg=`${pl.name} 碰 ${tName(t)}`;
@@ -819,7 +943,8 @@ function startNew(dealer){closeSheet();newGame(dealer);keepAwake();runGame();}
 /* ---------- rendering ---------- */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function cardHTML(t,cls,extra){
-  return `<span class="card ${CKEY[tC(t)]} ${cls||''}" aria-label="${tName(t)}"><span class="band">${COLORS[tC(t)]}</span><span class="ch">${RANKS[tR(t)]}</span>${extra||''}</span>`;
+  const ch=RANKS[tR(t)];
+  return `<span class="card ${CKEY[tC(t)]} ${cls||''}" aria-label="${tName(t)}"><span class="ch t">${ch}</span><span class="ch b">${ch}</span>${extra||''}</span>`;
 }
 function groupRow(types,label,pts){
   return `<div class="grow"><span class="cards">${types.map(t=>cardHTML(t,'ml')).join('')}</span><span class="lab">${label}${pts?` · ${pts} 台`:''}</span></div>`;
@@ -837,49 +962,65 @@ function render(){
   G.players[0].name=G.guest?G.players[0].name:S.name;
   if(!G.guest)G.players[0].pic=myPic();
   $('#meta').textContent=`第 ${ROUND} 局`;
-  const opps=$('#opps');opps.className='opps'+(N===3?' n3':'');
-  const idx=[];for(let i=N-1;i>=1;i--)idx.push(i);
-  opps.innerHTML=idx.map(i=>{
-    const pl=G.players[i],on=G.turn===i&&!G.over;
+  // seats around the table: 下家 right, 對家 top, 上家 left (3 players: 下家 right, 上家 left)
+  const pos=N===4?{1:'R',2:'T',3:'L'}:{1:'R',2:'L'};
+  const pend=G.last&&!G.over?G.last:null; // the card everybody is looking at right now
+  const river=(i,cap)=>{
+    const all=G.players[i].discards,d=all.slice(Math.max(0,all.length-cap));
+    return d.map((t,k)=>cardHTML(t,'rv'+(pend&&pend.p===i&&k===d.length-1?' just':''))).join('');
+  };
+  for(const s of ['T','L','R']){const el=$('#seat'+s);el.innerHTML='';el.className='seat s-'+({T:'top',L:'left',R:'right'})[s]+' empty';}
+  for(let i=1;i<N;i++){
+    const pl=G.players[i],on=G.turn===i&&!G.over,s=pos[i],c=chipsOf(i);
     const melds=pl.melds.map(m=>`<span class="grp">${m.types.map(t=>cardHTML(t,'sm')).join('')}</span>`).join('');
-    const disc=pl.discards.slice(-8).map(t=>cardHTML(t,'sm')).join('');
-    const c=chipsOf(i);
-    return `<div class="opp${on?' on':''}">
-      <div class="opp-h">${avHTML(pl)}<div style="min-width:0"><div class="oname">${talking(i)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span> `:''}${esc(pl.name)}${pl.kind==='remote'?' <span class="tag">家人</span>':''}</div><div class="osub">${SEATS[N][i]} · ${pl.hand.length} 張${G.dealer===i?' · 莊':''}</div></div></div>
-      <div class="ocash"><span class="coin c10" aria-hidden="true">10</span>${fmt(c||0)}</div>
-      ${melds?`<div class="olabel">亮牌</div><div class="mini">${melds}</div>`:''}
-      ${disc?`<div class="olabel">打過</div><div class="mini">${disc}</div>`:''}
-    </div>`;
-  }).join('');
-  const pile=`<div class="pile"><div class="back" aria-hidden="true"></div><div>牌堆 <b>${G.pile.length}</b></div></div>`;
+    const el=$('#seat'+s);
+    el.className='seat s-'+({T:'top',L:'left',R:'right'})[s]+(on?' on':'');
+    el.innerHTML=`<div class="sp">${avHTML(pl,'seat-av')}${talking(i)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:''}</div>
+      <div class="sinfo"><div class="oname">${esc(pl.name)}${G.dealer===i?' <span class="tag zh">莊</span>':''}</div>
+        <div class="osub">${pl.hand.length} 張 · <span class="coin c10" aria-hidden="true">10</span>${fmt(c||0)}</div></div>
+      ${melds?`<div class="mini">${melds}</div>`:''}`;
+  }
+  $('#rivB').innerHTML=river(0,12);
+  $('#rivT').innerHTML=N===4?river(2,12):'';
+  $('#rivL').innerHTML=river(N===4?3:2,8);
+  $('#rivR').innerHTML=river(1,8);
+  const pile=`<div class="pile"><div class="back" aria-hidden="true"></div><div><b>${G.pile.length}</b></div></div>`;
   const who=i=>i===0?'你':esc(nameOf(i));
-  if(G.shown)$('#center').innerHTML=`<div class="cwrap"><div class="who">${who(G.shown.p)} 摸到</div>${cardHTML(G.shown.t,'md hl')}</div>${pile}`;
-  else if(G.last)$('#center').innerHTML=`<div class="cwrap"><div class="who">${who(G.last.p)} ${G.last.rej?'不要':'打出'}</div>${cardHTML(G.last.t,'md hl')}</div>${pile}`;
-  else $('#center').innerHTML=`<div class="cwrap"><div class="who">${G.over?'這局結束':(G.turn>=0?`輪到 ${who(G.turn)}`:'')}</div></div>${pile}`;
+  let big='';
+  if(G.shown)big=`<div class="cwrap"><div class="who">${who(G.shown.p)} 摸到</div>${cardHTML(G.shown.t,'md hl')}</div>`;
+  else if(pend)big=`<div class="cwrap"><div class="who">${who(pend.p)} ${pend.rej?'不要':'打出'}</div>${cardHTML(pend.t,'md hl')}</div>`;
+  else big=`<div class="cwrap"><div class="who big">${G.over?'這局結束':(G.turn>=0?`輪到 ${who(G.turn)}`:'')}</div></div>`;
+  $('#center').innerHTML=big+pile;
   const me=G.players[0];
-  $('#meldSect').hidden=!me.melds.length;
   $('#melds').innerHTML=me.melds.map(m=>`<div class="meld">${m.types.map(t=>cardHTML(t,'ml')).join('')}</div>`).join('');
   $('#handLabel').innerHTML=`<span class="me-av">${avHTML(me)}${talking(0)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:''}<span>${esc(me.name)}的牌${G.dealer===0?' · 莊':''}</span></span>`;
   const mc=chipsOf(0)||0;
-  $('#myCash').innerHTML=`${moneyHTML(mc)}<span>${fmt(mc)}</span>`;
+  $('#myCash').innerHTML=`<span class="coin c10" aria-hidden="true">10</span><span>${fmt(mc)} 元</span>`;
   const choosing=G.waiting&&G.waiting.kind==='discard';
   $('#hand').className='hand'+(G.turn===0&&!G.over?' on':'');
   const newId=G.newIds[0];
-  let rows='';
-  for(let c=0;c<4;c++){
-    const cs=me.hand.filter(x=>tC(x.t)===c);
-    if(!cs.length)continue;
-    rows+=`<div class="row">${cs.map(x=>{
-      const sel=G.sel===x.id?' sel':'';
-      return `<button type="button" class="card lg ${CKEY[c]}${sel}" data-id="${x.id}" aria-label="${tName(x.t)}" ${choosing?'':'tabindex="-1"'}><span class="band">${COLORS[c]}</span><span class="ch">${RANKS[tR(x.t)]}</span>${newId!=null&&newId===x.id?'<span class="new" aria-label="新摸的"></span>':''}</button>`;
-    }).join('')}</div>`;
+  // hold the cards the way people do: one fanned stack per family — 將士象 and 車馬包 of each color, and all the 卒 together
+  const fam=t=>tR(t)===6?8:tC(t)*2+(tR(t)<=2?0:1);
+  const stacks=[];
+  for(let f=0;f<=8;f++){
+    const cs=me.hand.filter(x=>fam(x.t)===f);
+    const per=isLand()&&innerHeight<600?3:4;
+    for(let k=0;k<cs.length;k+=per)stacks.push(cs.slice(k,k+per));
   }
-  $('#hand').innerHTML=rows;
+  $('#hand').innerHTML=stacks.map(cs=>`<div class="stack">${cs.map(x=>{
+    const ch=RANKS[tR(x.t)],sel=G.sel===x.id?' sel':'';
+    return `<button type="button" class="card lg ${CKEY[tC(x.t)]}${sel}" data-id="${x.id}" aria-label="${tName(x.t)}" ${choosing?'':'tabindex="-1"'}><span class="ch t">${ch}</span><span class="ch b">${ch}</span>${newId!=null&&newId===x.id?'<span class="new" aria-label="新摸的"></span>':''}</button>`;
+  }).join('')}</div>`).join('');
+  // size the cards so every stack fits on one line
+  {const hd=$('#hand'),n=Math.max(1,stacks.length),land=isLand()&&innerHeight<600,big=!!S.big;
+   const max=land?(big?33:29):(big?54:48),avail=hd.clientWidth-10;
+   hd.style.setProperty('--hand-w',Math.max(22,Math.min(max,Math.floor((avail-(n-1)*3)/n)))+'px');}
   $('#msg').textContent=G.pm[0]||G.msg;
   const w=G.waiting;let a='';
   if(!w){a=G.over?`<div class="wait">這局結束</div>`:`<div class="wait"><span class="dots"><span></span><span></span><span></span></span></div>`;}
   else if(w.kind==='discard'){
     if(w.canHu)a+=actBtn('hu','hu',ICON.fan,'胡');
+    if(w.kaiT>=0)a+=actBtn('primary','kai',[w.kaiT,w.kaiT,w.kaiT,w.kaiT].map(t=>cardHTML(t,'bt')).join(''),'開');
     const selCard=G.sel!=null?me.hand.find(x=>x.id===G.sel):null;
     a+=actBtn('primary','discard',(selCard?cardHTML(selCard.t,'bt'):'')+ICON.up,'打出',!selCard);
     a+=actBtn('ghost','hint',ICON.bulb,'提示');
@@ -889,6 +1030,7 @@ function render(){
     a+=actBtn('pass','pass',ICON.x,'不要');
   }else if(w.kind==='claim'){
     if(w.canHu)a+=actBtn('hu','hu',ICON.fan,'胡');
+    if(w.canKai)a+=actBtn('primary','kai',[w.t,w.t,w.t,w.t].map(t=>cardHTML(t,'bt')).join(''),'開');
     if(w.canPeng)a+=actBtn('primary','peng',[w.t,w.t,w.t].map(t=>cardHTML(t,'bt')).join(''),'碰');
     if(w.chiOpts.length){
       const pic=w.chiOpts.length===1?[...w.chiOpts[0].use,w.t].sort((x,y)=>x-y).map(t=>cardHTML(t,'bt')).join(''):cardHTML(w.t,'bt')+'<span style="font-size:24px">…</span>';
@@ -918,6 +1060,7 @@ $('#actions').addEventListener('click',e=>{
   else if(act==='keep')w.resolve({type:'keep'});
   else if(act==='hint'){const c=pickDiscard(G.players[0].hand,'hint');G.sel=c.id;G.selAt=Date.now();G.pm[0]=`建議打 ${tName(c.t)}`;render();say(['hint',ck(c.t)],true);}
   else if(act==='peng')w.resolve({type:'peng'});
+  else if(act==='kai')w.resolve({type:'kai'});
   else if(act==='pass')w.resolve({type:'pass'});
   else if(act==='chi'){
     if(w.chiOpts.length===1)w.resolve({type:'chi',opt:w.chiOpts[0]});
@@ -1498,6 +1641,10 @@ function openRuleEditor(justReset){
     <h3>吃和碰</h3>
     ${ruleSeg('chi','吃牌',[['next','只能吃上家'],['any','誰的都能吃'],['none','不能吃']],'「誰的都能吃」時，離打牌的人越近越優先')}
     ${ruleSeg('peng','碰牌',[[true,'可以碰'],[false,'不能碰']])}
+    ${ruleSeg('chiPair','手上有一張，上家打一張一樣的',[[true,'可以吃成一對'],[false,'不行']],'要同顏色同一種，例如紅馬吃紅馬')}
+    <h3>開（四張一樣）</h3>
+    ${ruleSeg('kaiDiscard','手上有三張一樣，別人打第四張',[[true,'可以開'],[false,'不能開']],'有些地方規定只能開自己摸的')}
+    ${ruleSeg('kaiAdd','碰了以後，自己摸到第四張',[[true,'可以加開'],[false,'不行']])}
     <h3>牌組</h3>
     ${ruleSeg('singleJiang','將（帥）單張算一組',[[true,'算'],[false,'不算']])}
     ${ruleSeg('pairs','對子（兩張一樣）算一組',[[false,'不算'],[true,'算']])}
@@ -1510,8 +1657,10 @@ function openRuleEditor(justReset){
     ${stepper('pts.三卒','三張卒',0,20)}
     ${stepper('pts.四卒','四張卒',0,20)}
     ${stepper('pts.坎','坎',0,20,'手上自己湊到三張一樣')}
-    ${stepper('pts.四張','四張一樣',0,30)}
+    ${stepper('pts.四張','暗開',0,30,'四張一樣，全部自己摸的')}
+    ${stepper('pts.明開','明開',0,30,'開別人打的，或碰了再加開')}
     ${stepper('pts.碰','碰出來的三張',0,20)}
+    ${stepper('pts.吃對','吃成的一對',0,20)}
     ${stepper('pts.對子','對子',0,20,'要先把「對子算一組」打開')}
     <h3>胡牌</h3>
     ${stepper('minPts','胡牌最少要幾台',0,40,'0 就是不限')}
@@ -1569,8 +1718,8 @@ window.__rec=(type,status)=>{
 
 function openRules(){
   const A=G&&STARTED?R:SAVED;
-  const kinds=['單將','將士象','車馬包','三卒','四卒','坎','四張','碰','對子'].filter(k=>!(k==='單將'&&!A.singleJiang)&&!(k==='對子'&&!A.pairs)&&!(k==='碰'&&!A.peng));
-  const note={'將士象':A.mixTrio?'（可不同色）':'（同色）','車馬包':A.mixTrio?'（可不同色）':'（同色）','三卒':A.mixZu?'':'（不同色）','四卒':A.mixZu?'':'（不同色）','坎':'（手上三張一樣）'};
+  const kinds=['單將','將士象','車馬包','三卒','四卒','坎','四張','明開','碰','吃對','對子'].filter(k=>!(k==='單將'&&!A.singleJiang)&&!(k==='對子'&&!A.pairs)&&!(k==='碰'&&!A.peng)&&!(k==='吃對'&&!A.chiPair)&&!(k==='明開'&&!A.kaiDiscard&&!A.kaiAdd));
+  const note={'將士象':A.mixTrio?'（可不同色）':'（同色）','車馬包':A.mixTrio?'（可不同色）':'（同色）','三卒':A.mixZu?'':'（不同色）','四卒':A.mixZu?'':'（不同色）','坎':'（手上三張一樣）','四張':'（四張一樣，自己摸的）','明開':'（四張一樣，開來的）','吃對':'（吃上家的）'};
   const pt=kinds.map(k=>`<tr><td>${KL[k]}${note[k]||''}</td><td>${A.pts[k]||0} 台</td></tr>`).join('');
   const chiTxt={next:'只能吃上家打的牌。',any:'誰打的牌都能吃，離打牌的人越近越優先。',none:'這個打法不能吃。'}[A.chi];
   const diff=G&&STARTED&&!G.guest&&JSON.stringify(SAVED)!==JSON.stringify(R);
@@ -1578,13 +1727,27 @@ function openRules(){
     ${diff?'<div class="note">你改過規則，下一局才會照新規則打。下面是這一局的規則。</div>':''}
     <ul>
       <li><b>點一張牌，再點一次</b>就打出去</li>
-      <li>紅色＝<b>胡</b>　橘色＝<b>碰</b>　藍色＝<b>吃</b>　灰色＝<b>不要</b></li>
+      <li>紅色＝<b>胡</b>　橘色＝<b>碰</b>、<b>開</b>　藍色＝<b>吃</b>　灰色＝<b>不要</b></li>
       <li>牌全部湊好就能<b>胡</b></li>
     </ul>
     <h3>台數</h3>
     <table class="ptable">${pt}</table>
     ${STARTED||NET.mode?'<button class="big-btn" type="button" data-go="close">知道了</button>':`<button class="big-btn go" type="button" data-go="start" aria-label="開始打牌">${ICON.play}</button>`}`);
 }
+/* 轉向: flip between sideways (full screen) and upright */
+async function rotateScreen(){
+  const want=isLand()?'port':'land';
+  S.orient=want;savePrefs();
+  if(NATIVE&&typeof NATIVE.orient==='function'){try{NATIVE.orient(want);}catch(e){}return;}
+  try{
+    if(want==='land'&&document.documentElement.requestFullscreen&&!document.fullscreenElement)await document.documentElement.requestFullscreen();
+    if(screen.orientation&&screen.orientation.lock){await screen.orientation.lock(want==='land'?'landscape':'portrait');return;}
+  }catch(e){}
+  if(want==='port'&&document.fullscreenElement)try{await document.exitFullscreen();}catch(e){}
+  openSheet(`<h2>轉向</h2><p>${want==='land'?'把手機<b>橫著拿</b>':'把手機<b>直著拿</b>'}就好。</p><p class="muted">如果畫面不會跟著轉，請打開手機的「自動旋轉」。</p><button class="big-btn" type="button" data-go="close">知道了</button>`);
+}
+$('#btnRot').addEventListener('click',rotateScreen);
+addEventListener('resize',()=>{if(G)render();});
 $('#btnRules').addEventListener('click',openRules);
 $('#btnSet').addEventListener('click',openSettings);
 
@@ -1598,6 +1761,7 @@ function showWelcome(){
   <button class="big-btn alt" type="button" data-go="netJoinOpen">加入房間</button>`);
 }
 loadPrefs();
+if(NATIVE&&typeof NATIVE.orient==='function'&&S.orient)try{NATIVE.orient(S.orient);}catch(e){}
 refreshClips();
 lineLoadCfg();
 newGame(0);
