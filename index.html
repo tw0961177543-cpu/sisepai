@@ -667,7 +667,7 @@ async function discardPhase(p,bonus){
   }
   const pre=G.drawnT[p]!=null?`摸到 ${tName(G.drawnT[p])}。`:'';
   announce(`輪到 ${pl.name}`);
-  promptSeat(p,win?pre+'可以胡了！按紅色的胡':pre+'點一張牌，再點一次就打出去');
+  promptSeat(p,win?'可以胡了！':pre+'打一張牌');
   sayTo(p,win?'canhu':'turn');
   const r=await askSeat(p,{kind:'discard',canHu:!!win});delete G.pm[p];
   if(r&&r.type==='hu'&&win)return {hu:true};
@@ -698,7 +698,7 @@ async function claimPhase(d,t){
     if(!w.canHu&&!w.canPeng&&!w.chiOpts.length)continue;
     if(!waited){await sleep(400);waited=true;}
     const can=[w.canHu&&'胡',w.canPeng&&'碰',w.chiOpts.length&&'吃'].filter(Boolean).join('、');
-    promptSeat(q,`${P[d].name} ${G.last&&G.last.rej?'不要':'打出'} ${tName(t)}，可以${can}`);
+    promptSeat(q,`可以${can}`);
     sayTo(q,w.canHu?'ask_hu':w.canPeng?'ask_peng':'ask_chi');
     let a=await askSeat(q,w)||{type:'pass'};delete G.pm[q];
     if(a.type==='hu'&&!w.canHu)a={type:'pass'};
@@ -768,10 +768,10 @@ function showResult(){
 function resultHTML(s){
   const Rz=G.result,host=s===0;
   const nm=i=>i===s?'你':G.players[i].name;
-  const tail=host?`<button class="big-btn go" type="button" data-go="again" aria-label="再來一局">${ICON.again}</button><button class="big-btn alt" type="button" data-go="netLeave">${NET.mode==='host'?'關掉房間，回主畫面':'回主畫面'}</button>`:`<div class="note">等 ${esc(G.players[0].name)} 開下一局…</div>`;
-  if(Rz.kind==='draw')return `<h2>流局</h2><p>牌摸完了，這局沒有人胡牌。莊家不變。</p>${tail}`;
+  const tail=host?`<button class="big-btn go" type="button" data-go="again" aria-label="再來一局">${ICON.again}</button><button class="big-btn alt" type="button" data-go="netLeave">不打了</button>`:`<div class="note">等 ${esc(G.players[0].name)} 開下一局…</div>`;
+  if(Rz.kind==='draw')return `<h2>沒人胡</h2>${tail}`;
   const pl=G.players[Rz.p],w=Rz.w,self=Rz.from==null;
-  const how=self?'自己摸到的（自摸）':`胡 ${nm(Rz.from)} ${'打出'}的 ${tName(Rz.t)}`;
+  const how=self?'自摸':`${nm(Rz.from)} 放槍`;
   let rows=w.groups.map(g=>groupRow(g.types,KL[g.kind],g.pts)).join('')+pl.melds.map(m=>groupRow(m.types,KL[m.kind]+'（亮牌）',m.pts)).join('');
   if(self&&R.zimo&&w.bonus)rows+=`<div class="grow"><span class="lab">自摸 · ${R.zimo} 台</span></div>`;
   if(Rz.p===G.dealer&&R.dealerBonus)rows+=`<div class="grow"><span class="lab">莊家 · ${R.dealerBonus} 台</span></div>`;
@@ -779,7 +779,7 @@ function resultHTML(s){
   return `<h2>${Rz.p===s?'恭喜你，胡了！':`${esc(pl.name)} 胡了`}</h2>
     <p class="muted">${how}</p>
     <div class="glist">${rows}</div>
-    <div class="total">共 ${w.total} 台 · ${self||R.payMode==='all'?'每家付':`${esc(nm(Rz.from))}付`} ${fmt(Rz.amt)} 元</div>
+    <div class="total">${w.total} 台</div>
     <div>${pay}</div>
     ${tail}`;
 }
@@ -805,7 +805,7 @@ function render(){
   const N=NP();
   G.players[0].name=G.guest?G.players[0].name:S.name;
   if(!G.guest)G.players[0].pic=myPic();
-  $('#meta').textContent=`第 ${ROUND} 局 · 莊家：${nameOf(G.dealer)}${NET.mode?' · 連線中':''}`;
+  $('#meta').textContent=`第 ${ROUND} 局`;
   const opps=$('#opps');opps.className='opps'+(N===3?' n3':'');
   const idx=[];for(let i=N-1;i>=1;i--)idx.push(i);
   opps.innerHTML=idx.map(i=>{
@@ -828,7 +828,7 @@ function render(){
   const me=G.players[0];
   $('#meldSect').hidden=!me.melds.length;
   $('#melds').innerHTML=me.melds.map(m=>`<div class="meld">${m.types.map(t=>cardHTML(t,'ml')).join('')}</div>`).join('');
-  $('#handLabel').innerHTML=`<span class="me-av">${avHTML(me)}${talking(0)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:''}<span>${esc(me.name)}的牌 · ${me.hand.length} 張${G.dealer===0?' · 莊家':''}</span></span>`;
+  $('#handLabel').innerHTML=`<span class="me-av">${avHTML(me)}${talking(0)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:''}<span>${esc(me.name)}的牌${G.dealer===0?' · 莊':''}</span></span>`;
   const mc=chipsOf(0)||0;
   $('#myCash').innerHTML=`${moneyHTML(mc)}<span>${fmt(mc)}</span>`;
   const choosing=G.waiting&&G.waiting.kind==='discard';
@@ -877,7 +877,7 @@ $('#hand').addEventListener('click',e=>{
   if(G.sel===id&&Date.now()-G.selAt>350){G.waiting.resolve({type:'discard',id});return;}
   G.sel=id;G.selAt=Date.now();render();
   const c=G.players[0].hand.find(x=>x.id===id);
-  if(c){G.pm[0]=`選了 ${tName(c.t)}，再點一次就打出去`;render();G.picks++;say(G.picks<=2?[ck(c.t),'pick']:[ck(c.t)],true);}
+  if(c){G.pm[0]='再點一次打出去';render();G.picks++;say(G.picks<=2?[ck(c.t),'pick']:[ck(c.t)],true);}
 });
 $('#actions').addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b||!G.waiting)return;
@@ -885,7 +885,7 @@ $('#actions').addEventListener('click',e=>{
   if(act==='hu')w.resolve({type:'hu'});
   else if(act==='discard'&&G.sel!=null)w.resolve({type:'discard',id:G.sel});
   else if(act==='keep')w.resolve({type:'keep'});
-  else if(act==='hint'){const c=pickDiscard(G.players[0].hand,'hint');G.sel=c.id;G.selAt=Date.now();G.pm[0]=`建議打出 ${tName(c.t)}，再點一次就打出去`;render();say(['hint',ck(c.t)],true);}
+  else if(act==='hint'){const c=pickDiscard(G.players[0].hand,'hint');G.sel=c.id;G.selAt=Date.now();G.pm[0]=`建議打 ${tName(c.t)}`;render();say(['hint',ck(c.t)],true);}
   else if(act==='peng')w.resolve({type:'peng'});
   else if(act==='pass')w.resolve({type:'pass'});
   else if(act==='chi'){
@@ -919,7 +919,7 @@ function netReset(){
   renderVc();
 }
 function netError(t){
-  openSheet(`<h2>連線有問題</h2><p>${t}</p><button class="big-btn" type="button" data-go="netLeave">回主畫面</button>`);
+  openSheet(`<h2>連不上</h2><p>${t}</p><button class="big-btn" type="button" data-go="netLeave">回主畫面</button>`);
 }
 function netLeave(){netReset();STARTED=false;ROUND=0;closeSheet();newGame(0);showWelcome();}
 function netUnavailable(){
@@ -928,7 +928,7 @@ function netUnavailable(){
 async function hostRoom(){
   if(!canNet())return netUnavailable();
   openSheet(`<h2>開房間</h2><p>準備中…</p>`);
-  try{await loadPeer();}catch(e){return netError('沒辦法載入連線功能，請重新打開 App。');}
+  try{await loadPeer();}catch(e){return netError('請關掉 App 再打開一次。');}
   netReset();
   NET.mode='host';NET.lobby=true;
   const open=()=>{
@@ -947,7 +947,7 @@ async function hostRoom(){
       if(err.type==='peer-unavailable')return; // a voice call to someone who just left
       if(err.type==='unavailable-id'&&NET.retry<6){NET.retry++;try{peer.destroy();}catch(e){}if(NET.lobby)openSheet(`<h2>開房間</h2><p>房間還在整理，請等一下…（${NET.retry}）</p>`);setTimeout(()=>{if(NET.mode==='host')open();},4000);return;}
       if(['network','server-error','socket-error','socket-closed','unavailable-id','browser-incompatible'].includes(err.type)){
-        if(NET.lobby)netError(err.type==='browser-incompatible'?'這支手機不支援連線打牌。':'連不上網路。請確認手機有開網路，再試一次。');
+        if(NET.lobby)netError(err.type==='browser-incompatible'?'這支手機不支援連線打牌。':'連不上網路，請再試一次。');
         else announce('網路不穩，連線可能中斷');
       }
     });
@@ -958,20 +958,19 @@ function openLobby(){
   if(!NET.lobby)return;
   const N=SAVED.players;
   const vdot=on=>on?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:'';
-  const rows=[`<div class="seatrow">${avHTML({avc:'av0',av:S.name[0]||'我',pic:myPic()})}${vdot(VC.on)}${esc(S.name)}<span class="sub">房主</span></div>`];
+  const rows=[`<div class="seatrow">${avHTML({avc:'av0',av:S.name[0]||'我',pic:myPic()})}${vdot(VC.on)}${esc(S.name)}</div>`];
   for(let i=1;i<N;i++){
     const g=NET.guests.find(x=>x.open&&x.seat===i);
-    rows.push(g?`<div class="seatrow">${avHTML({avc:'av'+i,av:g.name[0],pic:g.pic})}${vdot(NET.vroster.has(g.conn.peer))}${esc(g.name)}<span class="sub">家人 · 已連上</span></div>`
-               :`<div class="seatrow"><span class="av ${AI_SET[N][i][2]}">${AI_SET[N][i][1]}</span>${AI_SET[N][i][0]}<span class="sub">電腦（等人加入）</span></div>`);
+    rows.push(g?`<div class="seatrow">${avHTML({avc:'av'+i,av:g.name[0],pic:g.pic})}${vdot(NET.vroster.has(g.conn.peer))}${esc(g.name)}<span class="sub">來了</span></div>`
+               :`<div class="seatrow"><span class="av ${AI_SET[N][i][2]}">${AI_SET[N][i][1]}</span>${AI_SET[N][i][0]}<span class="sub">電腦</span></div>`);
   }
-  openSheet(`<h2>開房間</h2>
-    <p class="muted">請家人在自己的手機打開四色牌 App，按「加入家人的房間」，輸入這個號碼：</p>
+  openSheet(`<h2>等家人來</h2>
+    <p class="muted">把號碼告訴家人：</p>
     <div class="code" aria-label="房間號碼">${roomCode()}</div>
     <div class="seats">${rows.join('')}</div>
-    <p class="muted">沒人加入的位子，會由電腦陪打。人到了就可以開始。</p>
     ${vcBtnHTML()}
-    <button class="big-btn go" type="button" data-go="netStart" aria-label="開始打牌">${ICON.play}</button>
-    <button class="big-btn alt" type="button" data-go="netLeave">關掉房間</button>`);
+    <button class="big-btn go" type="button" data-go="netStart" aria-label="開始打牌">${ICON.play}<span style="font-size:22px">開始</span></button>
+    <button class="big-btn alt" type="button" data-go="netLeave">不打了</button>`);
 }
 function lobbyNames(){return NET.guests.filter(g=>g.open).map(g=>g.name);}
 async function hostOnData(conn,m){
@@ -1043,10 +1042,9 @@ function syncGuests(){
 /* guest side */
 function openJoin(){
   if(!canNet())return netUnavailable();
-  openSheet(`<h2>加入家人的房間</h2>
+  openSheet(`<h2>加入房間</h2>
     <label class="field" for="joinName"><span>你的名字</span><input id="joinName" maxlength="6" value="${esc(S.name==='奶奶'?'':S.name)}" placeholder="例如：小明"></label>
-    <label class="field" for="joinCode"><span>房間號碼（6 個數字）</span><input id="joinCode" class="codein" inputmode="numeric" maxlength="6" value="${esc(S.lastRoom||'')}" placeholder="000000"></label>
-    <p class="muted">房間號碼在房主手機的「開房間」畫面上。房主要先按「開房間」，你才連得上。</p>
+    <label class="field" for="joinCode"><span>房間號碼</span><input id="joinCode" class="codein" inputmode="numeric" maxlength="6" value="${esc(S.lastRoom||'')}" placeholder="000000"></label>
     <button class="big-btn net" type="button" data-go="netJoin">${ICON.people}加入</button>
     <button class="big-btn alt" type="button" data-go="close">取消</button>`);
 }
@@ -1057,13 +1055,13 @@ async function joinRoom(){
   if(code.length!==6){$('#joinCode').focus();return;}
   S.name=name;S.lastRoom=code;savePrefs();
   openSheet(`<h2>連線中…</h2><p>正在找房間 ${code}</p><button class="big-btn alt" type="button" data-go="netLeave">取消</button>`);
-  try{await loadPeer();}catch(e){return netError('沒辦法載入連線功能，請重新打開 App。');}
+  try{await loadPeer();}catch(e){return netError('請關掉 App 再打開一次。');}
   let token=null;
   if(lineReady()){
     const r=await lineCall('fresh');
     if(!r.ok){
       if(r.err==='expired'){LINE_PROF=null;return showLogin('LINE 登入過期了，請再登入一次，然後重新加入。');}
-      return netError('沒辦法跟 LINE 確認身分，請檢查網路再試一次。');
+      return netError('連不上 LINE，請再試一次。');
     }
     token=r.token;if(r.profile)setProfile(r.profile);
   }
@@ -1078,14 +1076,14 @@ async function joinRoom(){
     NET.conn=conn;
     conn.on('open',()=>{opened=true;netSend(conn,{type:'hello',name:S.name,line:token});});
     conn.on('data',guestOnData);
-    conn.on('close',()=>{if(NET.mode==='guest'&&NET.conn===conn)netError(opened?'連線中斷了。可以回主畫面再加入一次。':'連不上這個房間。');});
-    setTimeout(()=>{if(NET.mode==='guest'&&!opened)netError('連不上。請確認房間號碼，或請房主先按「開房間」，再試一次。');},20000);
+    conn.on('close',()=>{if(NET.mode==='guest'&&NET.conn===conn)netError(opened?'斷線了，請再加入一次。':'連不上這個房間。');});
+    setTimeout(()=>{if(NET.mode==='guest'&&!opened)netError('連不上，請確認房間號碼。');},20000);
   });
   peer.on('error',err=>{
     if(NET.peer!==peer)return;
     if(opened&&err.type==='peer-unavailable')return; // a voice call to someone who just left
-    if(err.type==='peer-unavailable')netError('找不到這個房間。請確認號碼，或請房主先按「開房間」。');
-    else if(!opened)netError('連線失敗，請檢查網路再試一次。');
+    if(err.type==='peer-unavailable')netError('找不到這個房間，請確認號碼。');
+    else if(!opened)netError('連不上，請再試一次。');
   });
 }
 function guestOnData(m){
@@ -1096,10 +1094,10 @@ function guestOnData(m){
     if(!STARTED)guestWait();
   }else if(m.type==='vroster'){vcApply(Array.isArray(m.ids)?m.ids.map(String):[]);if(!STARTED&&!$('#modal').hidden&&$('#vcLobby'))guestWait();}
   else if(m.type==='needline')netError('要先用 LINE 登入，才能加入房間。');
-  else if(m.type==='badline')netError('LINE 身分確認沒有通過。請到「設定」重新登入 LINE，再加入一次。');
-  else if(m.type==='linenet')netError('房主的手機連不上 LINE 確認身分，請等一下再試。');
+  else if(m.type==='badline')netError('LINE 登入有問題，請到「設定」重新登入。');
+  else if(m.type==='linenet')netError('房主的手機連不上 LINE，等一下再試。');
   else if(m.type==='full')netError('房間已經坐滿了。');
-  else if(m.type==='busy')netError('他們正在打牌，等這局打完再加入一次。');
+  else if(m.type==='busy')netError('正在打牌，這局打完再加入。');
   else if(m.type==='bye')netError('房主關掉房間了。');
   else if(m.type==='start'){R=m.rules;MEMO.clear();STARTED=true;closeSheet();}
   else if(m.type==='view')applyView(m.v);
@@ -1112,7 +1110,7 @@ function guestOnData(m){
   else if(m.type==='result'){openSheet(m.html);if(m.coin)coinSound();}
 }
 function guestWait(){
-  openSheet(`<h2>已經連上了</h2><p>等 ${esc(NET.hostName||'房主')} 按開始…</p>${NET.names&&NET.names.length?`<p class="muted">一起打的家人：${NET.names.map(esc).join('、')}</p>`:''}
+  openSheet(`<h2>連上了</h2><p>等 ${esc(NET.hostName||'房主')} 開始…</p>${NET.names&&NET.names.length?`<p class="muted">一起打：${NET.names.map(esc).join('、')}</p>`:''}
     <div id="vcLobby">${vcBtnHTML()}</div>
     <button class="big-btn alt" type="button" data-go="netLeave">離開</button>`);
 }
@@ -1190,14 +1188,14 @@ function showLogin(msg){
   const ready=lineReady();
   openSheet(`<h2>四色牌</h2>
     ${msg?`<div class="note">${esc(msg)}</div>`:''}
-    ${ready?`<p>請先用 LINE 登入。家人幫忙登入一次就好，以後打開 App 就不用再登入。</p>
+    ${ready?`<p class="muted">家人幫忙登入一次就好</p>
       <button class="big-btn line" type="button" data-go="lineLogin">用 LINE 登入</button>`
     :`<p class="muted">LINE 登入還沒設定好。家人要先到 LINE Developers 申請一個 LINE Login Channel，再把號碼填進來。</p>
       <button class="big-btn" type="button" data-go="lineSetup">設定 LINE 登入（家人用）</button>`}
     ${!ready||LOGIN_FAILED?`<button class="big-btn alt" type="button" data-go="skipLogin">先不登入，跟電腦打</button>`:''}`);
 }
 async function doLineLogin(){
-  openSheet(`<h2>LINE 登入</h2><p>請在 LINE 的畫面登入…</p>`);
+  openSheet(`<h2>LINE 登入</h2><p>${WEBLINE?'請在 LINE 的畫面登入…':'正在登入…<br>沒回來就按綠色的「回到四色牌」'}</p>`);
   const r=await lineCall('login');
   if(r.ok&&r.profile){
     LOGIN_FAILED=false;LOGIN_SKIP=false;
@@ -1253,7 +1251,7 @@ function talking(i){
   return pl.kind==='remote'&&!!pl.conn&&NET.vroster.has(pl.conn.peer);
 }
 function vcBtnHTML(){
-  return `<button class="big-btn alt vcb${VC.on?' on':''}" type="button" data-go="vcToggle" ${VC.busy?'disabled':''}>${VC.on?ICON.mic+'語音聊天中（按一下關掉）':ICON.micOff+'打開語音聊天'}</button>${VC.err?`<div class="note">${esc(VC.err)}</div>`:''}`;
+  return `<button class="big-btn alt vcb${VC.on?' on':''}" type="button" data-go="vcToggle" ${VC.busy?'disabled':''}>${VC.on?ICON.mic+'講話中（按這裡關）':ICON.micOff+'按這裡講話'}</button>${VC.err?`<div class="note">${esc(VC.err)}</div>`:''}`;
 }
 function renderVc(){
   const b=$('#btnVc');if(!b)return;
@@ -1275,7 +1273,7 @@ async function vcToggle(){
   VC.busy=true;vcRefreshSheets();
   let st=null;
   try{st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});}
-  catch(e){VC.busy=false;VC.err='沒有麥克風權限，沒辦法講話。請按「允許」再試一次。';vcRefreshSheets();if(STARTED&&G)announce(VC.err);return;}
+  catch(e){VC.busy=false;VC.err='要按「允許」才能講話。';vcRefreshSheets();if(STARTED&&G)announce(VC.err);return;}
   VC.busy=false;
   if(!NET.mode){st.getTracks().forEach(t=>t.stop());return;}
   VC.stream=st;VC.on=true;
@@ -1542,18 +1540,12 @@ function openRules(){
   openSheet(`<h2>怎麼玩</h2>
     ${diff?'<div class="note">你改過規則，下一局才會照新規則打。下面是這一局的規則。</div>':''}
     <ul>
-      <li>黃、紅、綠、白四種顏色，每色有 將 士 象 車 馬 包 卒，每種 4 張，共 112 張。</li>
-      <li>${A.players} 個人打，每人 ${A.hand} 張${A.dealerExtra?`，莊家 ${A.hand+1} 張，莊家先打`:'，莊家先摸'}。</li>
-      <li>${A.openDraw?'摸到的牌先翻開給大家看。要就按「收起來」，再打一張出去；不要的話，別人可以吃、碰、胡。':'輪到你會自動摸一張。<b>點一張牌，再點一次</b>就打出去。'}</li>
-      <li>紅色按鈕是<b>胡</b>，橘色是<b>碰</b>或<b>收起來</b>，藍色是<b>吃</b>，灰色叉叉是<b>不要</b>。按鈕上會畫出要用的牌。</li>
-      <li>${A.peng?'碰：手上有兩張一樣的，誰打出來都能碰。':'這個打法不能碰。'}${chiTxt}</li>
-      <li>手上全部的牌都能湊成牌組，${A.minPts?`而且有 ${A.minPts} 台以上，`:''}就可以胡。牌堆摸完沒人胡，就是流局。</li>
-      ${A.zimo||A.dealerBonus?`<li>${A.zimo?`自摸多加 ${A.zimo} 台。`:''}${A.dealerBonus?`莊家胡牌多加 ${A.dealerBonus} 台。`:''}</li>`:''}
-      <li>胡牌拿錢：底 ${A.base} 元，每台再加 ${A.perTai} 元。${A.payMode==='all'?'每次都是其他人一起付。':'放槍的人付；自摸的話三家都付。'}</li>
+      <li><b>點一張牌，再點一次</b>就打出去</li>
+      <li>紅色＝<b>胡</b>　橘色＝<b>碰</b>　藍色＝<b>吃</b>　灰色＝<b>不要</b></li>
+      <li>牌全部湊好就能<b>胡</b></li>
     </ul>
-    <h3>牌組和台數</h3>
+    <h3>台數</h3>
     <table class="ptable">${pt}</table>
-    <p class="muted">規則可以到「設定 → 自訂遊戲規則」裡改。</p>
     ${STARTED||NET.mode?'<button class="big-btn" type="button" data-go="close">知道了</button>':`<button class="big-btn go" type="button" data-go="start" aria-label="開始打牌">${ICON.play}</button>`}`);
 }
 $('#btnRules').addEventListener('click',openRules);
@@ -1562,13 +1554,11 @@ $('#btnSet').addEventListener('click',openSettings);
 function showWelcome(){
   if(needLogin())return showLogin();
   const pic=myPic();
-  openSheet(`${pic?`<div class="prof">${avHTML({avc:'av0',av:S.name[0]||'我',pic},'lg')}<span>${esc(S.name)}，來打四色牌！</span></div>`:`<h2>${esc(S.name)}，來打四色牌！</h2>`}
-  <p class="muted">點一張牌、再點一次就打出去。</p>
+  openSheet(`${pic?`<div class="prof">${avHTML({avc:'av0',av:S.name[0]||'我',pic},'lg')}<span>${esc(S.name)}，來打牌！</span></div>`:`<h2>${esc(S.name)}，來打牌！</h2>`}
   <div class="cashbox">錢筒 ${moneyHTML(CHIPS[0])} <span>${fmt(CHIPS[0])} 元</span></div>
   <button class="big-btn go" type="button" data-go="start" aria-label="跟電腦打">${ICON.play}<span style="font-size:22px">跟電腦打</span></button>
-  ${canHost()?`<button class="big-btn net" type="button" data-go="netHost">${ICON.people}開房間，等家人連進來</button>`:''}
-  <button class="big-btn alt" type="button" data-go="netJoinOpen">加入家人的房間</button>
-  <button class="big-btn alt" type="button" data-go="rules">規則</button>`);
+  ${canHost()?`<button class="big-btn net" type="button" data-go="netHost">${ICON.people}跟家人打</button>`:''}
+  <button class="big-btn alt" type="button" data-go="netJoinOpen">加入房間</button>`);
 }
 loadPrefs();
 refreshClips();
