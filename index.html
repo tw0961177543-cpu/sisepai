@@ -522,7 +522,7 @@ async function keepAwake(){try{if(navigator.wakeLock)WL=await navigator.wakeLock
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&G&&!G.over)keepAwake();});
 
 /* ---------- game state helpers ---------- */
-const delay=()=>[1800,1100,600][S.speed]||1100;
+const delay=()=>[3000,1800,1100][S.speed]||3000;
 function sleep(ms){const gid=G.id;return new Promise((res,rej)=>setTimeout(()=>{if(!G||G.id!==gid)rej(ABORT);else res();},ms));}
 function waitHuman(w){return new Promise(res=>{G.waiting={...w,resolve:v=>{G.waiting=null;res(v);render();}};render();});}
 const sortHand=pl=>pl.hand.sort((a,b)=>a.t-b.t||a.id-b.id);
