@@ -74,9 +74,11 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 }
 @media (max-width:699px) and (orientation:portrait){
   .brand{font-size:21px} .meta{font-size:14px} .tbtn{padding:6px 9px; font-size:15px}
-  .card.rv{--w:16px} .card.md{--w:38px}
-  .who{font-size:14px; white-space:normal; max-width:5.5em}
-  .av.seat-av{width:42px; height:42px; font-size:21px}
+  .felt .card.rv{--w:16px} .center .card.md{--w:36px}
+  .center .who{font-size:14px; white-space:normal; max-width:5.5em}
+  .felt .felt-mid{gap:4px}
+  .av.seat-av{width:38px; height:38px; font-size:19px}
+  #actions .act{min-height:72px}
   .felt{min-height:0; padding:10px 12px}
   #app{gap:6px}
 }
@@ -134,11 +136,12 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
 .back{width:26px; height:70px; border-radius:4px; background:repeating-linear-gradient(45deg, var(--back) 0 4px, var(--back-line) 4px 6px); box-shadow:3px 3px 0 var(--back-line), 5px 5px 0 var(--back); border:2px solid #f1e6cf}
 
 .sect{display:flex; flex-direction:column; gap:8px}
-.mehead{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap}
+.mehead{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.mehead .slabel{white-space:nowrap} .mehead .cashbox{font-size:15px; padding:2px 8px; white-space:nowrap}
 .slabel{font-size:16px; color:var(--muted); font-weight:700}
 .melds{display:flex; flex-wrap:wrap; gap:6px; flex:1; justify-content:center}
 .meld{display:flex; align-items:flex-end; gap:1px; padding:3px; background:var(--felt); border-radius:8px}
-.hand{display:flex; flex-wrap:wrap; justify-content:center; align-items:flex-start; gap:6px 5px; padding:12px 6px 8px; border-radius:16px; border:3px solid transparent}
+.hand{display:flex; flex-wrap:nowrap; justify-content:center; align-items:flex-start; gap:6px 5px; padding:12px 6px 8px; border-radius:16px; border:3px solid transparent}
 .hand.on{border-color:var(--on); background:var(--panel)}
 .stack{display:flex; flex-direction:column; align-items:center}
 .stack .card+.card{margin-top:calc(var(--w) * -1.62)}
@@ -1005,6 +1008,10 @@ function render(){
     const ch=RANKS[tR(x.t)],sel=G.sel===x.id?' sel':'';
     return `<button type="button" class="card lg ${CKEY[tC(x.t)]}${sel}" data-id="${x.id}" aria-label="${tName(x.t)}" ${choosing?'':'tabindex="-1"'}><span class="ch t">${ch}</span><span class="ch b">${ch}</span>${newId!=null&&newId===x.id?'<span class="new" aria-label="新摸的"></span>':''}</button>`;
   }).join('')}</div>`).join('');
+  // size the cards so every stack fits on one line
+  {const hd=$('#hand'),n=Math.max(1,stacks.length),land=isLand()&&innerHeight<600,big=!!S.big;
+   const max=land?(big?33:29):(big?54:48),avail=hd.clientWidth-16;
+   hd.style.setProperty('--hand-w',Math.max(22,Math.min(max,Math.floor((avail-(n-1)*5)/n)))+'px');}
   $('#msg').textContent=G.pm[0]||G.msg;
   const w=G.waiting;let a='';
   if(!w){a=G.over?`<div class="wait">這局結束</div>`:`<div class="wait"><span class="dots"><span></span><span></span><span></span></span></div>`;}
