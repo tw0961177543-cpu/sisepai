@@ -79,6 +79,8 @@ button:focus-visible{outline:3px solid var(--sel); outline-offset:2px}
   .felt .felt-mid{gap:4px}
   .av.seat-av{width:38px; height:38px; font-size:19px}
   #actions .act{min-height:72px}
+  main#app{padding-left:max(8px, env(safe-area-inset-left,0px)); padding-right:max(8px, env(safe-area-inset-right,0px))}
+  .mine .hand{gap:3px; padding:10px 4px 6px}
   .felt{min-height:0; padding:10px 12px}
   #app{gap:6px}
 }
@@ -992,7 +994,7 @@ function render(){
   $('#melds').innerHTML=me.melds.map(m=>`<div class="meld">${m.types.map(t=>cardHTML(t,'ml')).join('')}</div>`).join('');
   $('#handLabel').innerHTML=`<span class="me-av">${avHTML(me)}${talking(0)?`<span class="vc-dot" aria-label="語音中">${ICON.mic}</span>`:''}<span>${esc(me.name)}的牌${G.dealer===0?' · 莊':''}</span></span>`;
   const mc=chipsOf(0)||0;
-  $('#myCash').innerHTML=`${moneyHTML(mc)}<span>${fmt(mc)}</span>`;
+  $('#myCash').innerHTML=`<span class="coin c10" aria-hidden="true">10</span><span>${fmt(mc)} 元</span>`;
   const choosing=G.waiting&&G.waiting.kind==='discard';
   $('#hand').className='hand'+(G.turn===0&&!G.over?' on':'');
   const newId=G.newIds[0];
@@ -1010,8 +1012,8 @@ function render(){
   }).join('')}</div>`).join('');
   // size the cards so every stack fits on one line
   {const hd=$('#hand'),n=Math.max(1,stacks.length),land=isLand()&&innerHeight<600,big=!!S.big;
-   const max=land?(big?33:29):(big?54:48),avail=hd.clientWidth-16;
-   hd.style.setProperty('--hand-w',Math.max(22,Math.min(max,Math.floor((avail-(n-1)*5)/n)))+'px');}
+   const max=land?(big?33:29):(big?54:48),avail=hd.clientWidth-10;
+   hd.style.setProperty('--hand-w',Math.max(22,Math.min(max,Math.floor((avail-(n-1)*3)/n)))+'px');}
   $('#msg').textContent=G.pm[0]||G.msg;
   const w=G.waiting;let a='';
   if(!w){a=G.over?`<div class="wait">這局結束</div>`:`<div class="wait"><span class="dots"><span></span><span></span><span></span></span></div>`;}
